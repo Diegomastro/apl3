@@ -1,0 +1,20 @@
+Cominicacion:
+- Servidor muestra puntajes y estado de los jugadores
+- Servidor es el encargado de manejar los turnos
+- Para saber cuando el jugador 'x' paso un turno, uso semaforos
+- TODO: capaz usar C++ en vez de C
+- Todos misma palabra
+- Las vidas (cuerpo del ahorcado) no es memoria compartida, sistema
+de puntos del servidor, son 6 intentos
+- cuando el jugador pierde, le mandamos la senial SIG* para indicarle
+que termino su juego , ej
+signal(SIGASD, PID)
+- en la signal de fin, mandamos puntos y palabra por memoria compartida
+- semaforos para la coordinacion del proceso
+- pedimos cantidad de jugadores cuando inicia el server
+- ver que libreria de shared memory compartir
+
+Juego:
+- en un shared memory la palabra a adivinar
+- en otro shared memory o en un array la palabra en '*'
+- variables para puntaje, vidas por jugador (tal vez un array dinamico)
