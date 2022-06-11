@@ -3,35 +3,41 @@
 #include <sys/ipc.h> 
 #include <sys/shm.h> 
 #include <string.h>
+#include <stdlib.h>
 
-int main() {
-    // execute as "sudo ./main if you are using /something"
-    size_t len = 1024;
+char* crearMemoriaJugadores() {
+    size_t len = 1;
     int shmid = 0;
     char* addr = NULL;
-    struct shmid_ds shmbuf; // para shmctl
-    key_t key = ftok("/home/marco/sisop-apl/apl3/ejercicio4/test", 'x');
-    printf("Key = %d\n", key);
-    shmid = shmget(key, len, IPC_CREAT);
-
-    printf("shmid = %d\n", shmid);
-
-    if (shmid < 0) {
-        puts("Error con shmid");
-        return 1;
-    }
-
-    addr = shmat(shmid, NULL, 0);
-
-    if ((int)addr == -1) {
-        printf("%d\n", key);
-        puts("Addr == -1");
-        return -2;
-    }
-
-    printf("addr = %p\n", addr);
-    strcpy(addr, "string escrito en memoria compartida");
+    key_t key = ftok("/home/marco/sisop-apl/apl3/ejercicio4/cant_jugadores", 'A');
     
-    while(1);
+    shmid = shmget(key, len, IPC_CREAT);
+    addr = shmat(shmid, NULL, 0);
+    printf("%d\n", shmid);
+    printf("%p\n", addr);
+    if ((int)addr != -1) {
+        *addr = 0;
+        return NULL;
+    }
+
+    return addr;
+}
+
+int main() {
+    char* addr = crearMemoriaJugadores(); 
+    // char* addr = (char*)malloc(sizeof(char));
+    int numJugadores;
+    printf("Ingrese el numero de jugadores\n");
+    scanf("%d", &numJugadores);
+    printf("esperando a que se conecten todos los jugadores");
+    int estanTodos = 0;
+
+    while (estanTodos != numJugadores) {
+        char nuevosJugadores = *addr;
+        if (numJugadores != nuevosJugadores) {
+            ++numJugadores;
+        }
+    }
+    printf("fin del programa");
     return 0;
 }
