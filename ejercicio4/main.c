@@ -12,6 +12,8 @@ char* crearMemoriaCantJugadores();
 char* crearMemoriaJugadores();
 char* conseguirPalabra();
 char* crearMemoriaJugador(char* path, char id);
+int todosPierden(char* vidas, int numJugadores);
+int hayGanador(char* jugadores[], char* palabra);
 
 int main() {
     char* cantJugadores = crearMemoriaCantJugadores(); 
@@ -25,15 +27,54 @@ int main() {
     while (numJugadores != *cantJugadores); //esperamos por la cantidad de jugadores
     // PALABRA A ADIVINAR, despues habra que poner la logica para buscarlas de un archivo
     char palabra[] = "palabra";
-    char* jugador1 = crearMemoriaJugador("/home/marco/sisop-apl/apl3/ejercicio4/jug_1", 'X');
-    char* jugador2 = crearMemoriaJugador("/home/marco/sisop-apl/apl3/ejercicio4/jug_2", 'Y');
-    char* jugador3 = crearMemoriaJugador("/home/marco/sisop-apl/apl3/ejercicio4/jug_3", 'Z');
     char* jugadores[] = {
         crearMemoriaJugador("/home/marco/sisop-apl/apl3/ejercicio4/jug_1", 'X'),
         crearMemoriaJugador("/home/marco/sisop-apl/apl3/ejercicio4/jug_2", 'Y'),
         crearMemoriaJugador("/home/marco/sisop-apl/apl3/ejercicio4/jug_3", 'Z')
     };
+    int ganador = -1;
+    int turno = 0;
+    while ((ganador = hayGanador(jugadores, palabra)) == -1 && !todoPierden(vidasJugadores, numJugadores)) {
+        // empieza turno
+        /**
+         *  
+         * 
+         */
+        /**
+        subimos semaforo de que puede jugar el
+        jugador turno+1
+        */
+        /** 
+         * esperamos a que el proceso turno+1
+         * suba el semaforo que ya termino
+        */
+
+        
+        // fin de turno
+       ++turno;
+       turno %= 3;  // va de 0 a 2
+    }
+
     return 0;
+}
+
+int todosPierden(char* vidas, int numJugadores) {
+    for (int i = 0; i < numJugadores; ++i) {
+        if (*(vidas+i) > 0) {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+int hayGanador(char* jugadores[], char* palabra) {
+    for (int i = 0; i < 3; ++i) {
+       if (strcmp(jugadores[i], palabra) == 0) {
+           return i;
+       }
+    }
+    return -1;
 }
 
 char* crearMemoriaJugadores() {
