@@ -13,8 +13,21 @@ int main() {
     int id;
     sem_getvalue(sem_cantJugadores, &id);
 
-    //agarrar pedazo de memoria segun su id
+    char *sem_turno1_name = "turno1";
+    char *sem_turno2_name = "turno2";
+    char *sem_turno3_name = "turno3";
 
-    //strcat("jug_",id+'0');
+    char *sem_names[] = {sem_turno1_name, sem_turno2_name, sem_turno3_name};
+
+   
+    sem_t* sem_turno = sem_open(sem_names[id-1], 0);
+
+	while (1) {
+		puts("Espera tu turno..");
+		sem_wait(sem_turno);
+	}
+
+
+
     return 0;
 }

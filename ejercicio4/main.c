@@ -21,7 +21,20 @@ int hayGanador(char* jugadores[], char* palabra);
 
 int main() {
     const char *sem_cantJugadores_name = "cantJugadores";
+    char *sem_turno1_name = "turno1";
+    char *sem_turno2_name = "turno2";
+    char *sem_turno3_name = "turno3";
+    char *sem_names[] = {sem_turno1_name, sem_turno2_name, sem_turno3_name};
+
+    sem_unlink(sem_cantJugadores_name);
+    sem_unlink(sem_turno1_name);
+    sem_unlink(sem_turno2_name);
+    sem_unlink(sem_turno3_name);
     sem_t* sem_cantJugadores = sem_open(sem_cantJugadores_name, O_CREAT, 0600, 0);
+    sem_t* sem_turno1 = sem_open(sem_turno1_name, O_CREAT, 0600, 0);
+    sem_t* sem_turno2 = sem_open(sem_turno2_name, O_CREAT, 0600, 0);
+    sem_t* sem_turno3 = sem_open(sem_turno3_name, O_CREAT, 0600, 0);
+    
     int cantJugadores;
     sem_getvalue(sem_cantJugadores, &cantJugadores);
     
