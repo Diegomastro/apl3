@@ -7,9 +7,9 @@
 #include <fcntl.h>
 #include <semaphore.h>
 #include <unistd.h>
-#define MAX_PALABRA 21
+#define MAX_PALABRA 8
 
-const char PALABRA_INICIAL[MAX_PALABRA] = "********************";
+const char PALABRA_INICIAL[MAX_PALABRA] = "*******";
 
 char* crearMemoriaCantJugadores();
 char* crearMemoriaJugadores();

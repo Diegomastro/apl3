@@ -5,7 +5,7 @@
 #include <fcntl.h>
 #include <semaphore.h>
 #include <string.h>
-#define MAX_PALABRA 21
+#define MAX_PALABRA 8
 
 char* getPalabraDeJuego();
 void finalPartida();
