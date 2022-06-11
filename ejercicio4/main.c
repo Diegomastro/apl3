@@ -21,6 +21,7 @@ int hayGanador(char* jugadores[], char* palabra);
 
 int main() {
     const char *sem_cantJugadores_name = "cantJugadores";
+<<<<<<< HEAD
     char *sem_turno1_name = "turno1";
     char *sem_turno2_name = "turno2";
     char *sem_turno3_name = "turno3";
@@ -30,6 +31,9 @@ int main() {
     sem_unlink(sem_turno1_name);
     sem_unlink(sem_turno2_name);
     sem_unlink(sem_turno3_name);
+=======
+    sem_unlink(sem_cantJugadores_name);
+>>>>>>> e4e11a43f7e32de49683f5cbb441b38cf1576601
     sem_t* sem_cantJugadores = sem_open(sem_cantJugadores_name, O_CREAT, 0600, 0);
     sem_t* sem_turno1 = sem_open(sem_turno1_name, O_CREAT, 0600, 0);
     sem_t* sem_turno2 = sem_open(sem_turno2_name, O_CREAT, 0600, 0);
@@ -40,7 +44,6 @@ int main() {
     
     char* vidasJugadores = crearMemoriaJugadores();
     int numJugadores;
-    printf("%d", cantJugadores);
 
     printf("Ingrese el numero de jugadores\n");
     scanf("%d", &numJugadores);
@@ -60,6 +63,7 @@ int main() {
     };
     int ganador = -1;
     int turno = 0;
+ 
     while ((ganador = hayGanador(jugadores, palabra)) == -1 && !todosPierden(vidasJugadores, numJugadores)) {
         // empieza turno
         /**
@@ -78,8 +82,6 @@ int main() {
        turno %= 3;  // va de 0 a 2
     }
 
-
-    sem_unlink(sem_cantJugadores_name);
     return 0;
 }
 

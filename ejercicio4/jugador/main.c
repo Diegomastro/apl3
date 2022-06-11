@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <semaphore.h>
 #include <string.h>
+#define MAX_PALABRA 21
 
 int main() {
 	const char *sem_cantJugadores_name = "cantJugadores";
@@ -22,12 +23,23 @@ int main() {
    
     sem_t* sem_turno = sem_open(sem_names[id-1], 0);
 
+
+    char pathAMemoria[] = "jug_*";
+    pathAMemoria[4] = id+'0';
+    puts(pathAMemoria);
+    size_t len = MAX_PALABRA; // tam maximo de una palabra (sera una constante)
+    int shmid = 0;
+    char* palabraJugadorX = NULL;
+    key_t key = ftok(pathAMemoria,id);
+    shmid = shmget(key, len, IPC_CREAT);
+    palabraJugadorX = shmat(shmid, NULL, 0);
+
+
 	while (1) {
 		puts("Espera tu turno..");
 		sem_wait(sem_turno);
+		//jugar turno
 	}
-
-
 
     return 0;
 }
