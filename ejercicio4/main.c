@@ -15,13 +15,14 @@ char* crearMemoriaCantJugadores();
 char* crearMemoriaJugadores();
 char* conseguirPalabra();
 char* crearMemoriaJugador(char* path, char id);
-
 int todosPierden(char* vidas, int numJugadores);
 int hayGanador(char* jugadores[], char* palabra);
 int maxIndex(int arr[], int size);
 void finalPartida(int puntajes[], int size);
+void mostrarEstado(char*[], int[],int);
 
 int main() {
+    int puntajes[] = {0,0,0};
     char *sem_cantJugadores_name = "cantJugadores";
     char *sem_partidaTerminada_name = "partidaTerminada";
     char *sem_turno1_name = "turno1";
@@ -67,17 +68,37 @@ int main() {
     };
     int ganador = -1;
     int turno = 0;
-    
 
-    while ((ganador = hayGanador(jugadores, palabra)) == -1 && !todosPierden(vidasJugadores, numJugadores)) {
+
+    int* puntajeDeRonda = getMemoriaPuntaje();
+
+    while (!todosPierden(vidasJugadores, numJugadores)) {
         printf("Turno del jugador %d", turno+1);
         sem_post(sem_turnos[turno]);
         sem_wait(sem_letraMandada);//semaforo señalizando que se mandó la letra
+        int puntajeGanado = *puntajeDeRonda;
+        puntajes[turno] += puntajeGanado;
+
+        if (puntajeGanado < 0) {
+            --vidasJugadores[turno];
+        }
         ++turno;
         turno %= cantJugadores;  // va de 0 a 2
+        mostrarEstado(vidasJugadores, puntajes, numJugadores);
     }
 
     return 0;
+}
+
+int* getMemoriaPuntajeGanado() {
+    size_t len = sizeof(int);
+    int shmid = 0;
+    int* addr = NULL;
+    key_t key = ftok("./puntajes", 'B');
+    shmid = shmget(key, len, IPC_CREAT);
+    addr = shmat(shmid, NULL, 0);
+
+    return addr;
 }
 
 int todosPierden(char* vidas, int numJugadores) {
@@ -87,15 +108,6 @@ int todosPierden(char* vidas, int numJugadores) {
         }
     }
     return 1;
-}
-
-int hayGanador(char* jugadores[], char* palabra) {
-    for (int i = 0; i < 3; ++i) {
-       if (strcmp(jugadores[i], palabra) == 0) {
-           return i;
-       }
-    }
-    return -1;
 }
 
 char* crearMemoriaJugadores() {
@@ -120,7 +132,6 @@ char* crearMemoriaJugador(char* path, char id) {
     addr = shmat(shmid, NULL, 0);
     memcpy(addr, PALABRA_INICIAL, len);
     return addr;
-
 }
 
 void finalPartida(int puntajes[], int size) {
@@ -142,4 +153,10 @@ int maxIndex(int arr[], int size) {
         }
     }
     return index;
+}
+
+void mostrarEstado(char* vidas[], int puntajes[], int cantJugadores) {
+    for (int i = 0; i < cantJugadores; ++i) {
+        printf("Estado del jugador %d:\nvidas: %d\tpuntaje: %d\n", i+1, vidas[i], puntajes[i]);
+    }
 }
