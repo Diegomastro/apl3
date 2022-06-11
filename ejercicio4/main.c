@@ -25,6 +25,7 @@ int main() {
     char *sem_turno1_name = "turno1";
     char *sem_turno2_name = "turno2";
     char *sem_turno3_name = "turno3";
+    char *sem_letraMandada_name = "letraMandada";
     char *sem_names[] = {sem_turno1_name, sem_turno2_name, sem_turno3_name};
 
     sem_unlink(sem_cantJugadores_name);
@@ -34,10 +35,12 @@ int main() {
 
     sem_t* sem_cantJugadores = sem_open(sem_cantJugadores_name, O_CREAT, 0600, 0);
     sem_t* sem_partidaTerminada = sem_open(sem_partidaTerminada_name, O_CREAT, 0600, 0);
+    sem_t* sem_letraMandada = sem_open(sem_letraMandada_name, O_CREAT, 0600, 0);
     sem_t* sem_turno1 = sem_open(sem_turno1_name, O_CREAT, 0600, 0);
     sem_t* sem_turno2 = sem_open(sem_turno2_name, O_CREAT, 0600, 0);
     sem_t* sem_turno3 = sem_open(sem_turno3_name, O_CREAT, 0600, 0);
     
+    sem_t* sem_turnos[] = {sem_turno1, sem_turno2, sem_turno3};
     
     int cantJugadores;
     sem_getvalue(sem_cantJugadores, &cantJugadores);
@@ -55,6 +58,7 @@ int main() {
     } //esperamos por la cantidad de jugadores
     // PALABRA A ADIVINAR, despues habra que poner la logica para buscarlas de un archivo
     char palabra[] = "palabra";
+    char palabraX[] = "*******";
     char* jugadores[] = {
         crearMemoriaJugador("./jug_1", 'X'),
         crearMemoriaJugador("./jug_2", 'Y'),
@@ -62,23 +66,15 @@ int main() {
     };
     int ganador = -1;
     int turno = 0;
- 
-    while ((ganador = hayGanador(jugadores, palabra)) == -1 && !todosPierden(vidasJugadores, numJugadores)) {
-        // empieza turno
-        /**
-         * subimos semaforo de que puede jugar el
-         * jugador turno+1*  
-        */
-        
-        /** 
-         * esperamos a que el proceso turno+1
-         * suba el semaforo que ya termino
-        */
+    
+    crearPalabraJuego(palabra, palabraJuego);
 
-        
-        // fin de turno
-       ++turno;
-       turno %= 3;  // va de 0 a 2
+    while ((ganador = hayGanador(jugadores, palabra)) == -1 && !todosPierden(vidasJugadores, numJugadores)) {
+        printf("Turno del jugador %d", turno+1);
+        sem_post(sem_turnos[turno]);
+        sem_wait(sem_letraMandada);//semaforo señalizando que se mandó la letra
+        ++turno;
+        turno %= cantJugadores;  // va de 0 a 2
     }
 
     return 0;
@@ -126,3 +122,5 @@ char* crearMemoriaJugador(char* path, char id) {
     return addr;
 
 }
+
+
