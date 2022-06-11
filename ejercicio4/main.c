@@ -28,6 +28,11 @@ int main() {
     char* jugador1 = crearMemoriaJugador("/home/marco/sisop-apl/apl3/ejercicio4/jug_1", 'X');
     char* jugador2 = crearMemoriaJugador("/home/marco/sisop-apl/apl3/ejercicio4/jug_2", 'Y');
     char* jugador3 = crearMemoriaJugador("/home/marco/sisop-apl/apl3/ejercicio4/jug_3", 'Z');
+    char* jugadores[] = {
+        crearMemoriaJugador("/home/marco/sisop-apl/apl3/ejercicio4/jug_1", 'X'),
+        crearMemoriaJugador("/home/marco/sisop-apl/apl3/ejercicio4/jug_2", 'Y'),
+        crearMemoriaJugador("/home/marco/sisop-apl/apl3/ejercicio4/jug_3", 'Z')
+    };
     return 0;
 }
 
