@@ -15,9 +15,8 @@ char* crearMemoriaCantJugadores();
 char* crearMemoriaJugadores();
 char* conseguirPalabra();
 char* crearMemoriaJugador(char* path, char id);
-
 int todosPierden(char* vidas, int numJugadores);
-int hayGanador(char* jugadores[], char* palabra);
+void mostrarEstado(char*[], int[],int);
 
 int main() {
     int puntajes[] = {0,0,0};
@@ -81,6 +80,7 @@ int main() {
         }
         ++turno;
         turno %= cantJugadores;  // va de 0 a 2
+        mostrarEstado(vidasJugadores, puntajes, numJugadores);
     }
 
     return 0;
@@ -106,15 +106,6 @@ int todosPierden(char* vidas, int numJugadores) {
     return 1;
 }
 
-int hayGanador(char* jugadores[], char* palabra) {
-    for (int i = 0; i < 3; ++i) {
-       if (strcmp(jugadores[i], palabra) == 0) {
-           return i;
-       }
-    }
-    return -1;
-}
-
 char* crearMemoriaJugadores() {
     size_t len = sizeof(char) * 3;
     int shmid = 0;
@@ -137,7 +128,10 @@ char* crearMemoriaJugador(char* path, char id) {
     addr = shmat(shmid, NULL, 0);
     memcpy(addr, PALABRA_INICIAL, len);
     return addr;
-
 }
 
-
+void mostrarEstado(char* vidas[], int puntajes[], int cantJugadores) {
+    for (int i = 0; i < cantJugadores; ++i) {
+        printf("Estado del jugador %d:\nvidas: %d\tpuntaje: %d\n", i+1, vidas[i], puntajes[i]);
+    }
+}
