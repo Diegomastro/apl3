@@ -8,6 +8,7 @@
 #define MAX_PALABRA 21
 
 char* getPalabraDeJuego();
+void escribirPuntaje(int*);
 
 int main() {
     const char *sem_cantJugadores_name = "cantJugadores";
@@ -42,8 +43,17 @@ int main() {
     palabraJugadorX = shmat(shmid, NULL, 0);
 
     char* palabraDeJuego = getPalabraDeJuego();
+    int puntajeRonda = 0;
 
     while (!partidaTerminada) {
+        if (vidas <= 0) {
+            escribirPuntaje(0);
+            sem_getvalue(sem_partidaTerminada, &partidaTerminada);
+            if (partidaTerminada) {
+                break;
+            }
+            continue;
+        }
         sem_wait(sem_turno);
         sem_getvalue(sem_partidaTerminada, &partidaTerminada);
         if (partidaTerminada) {
@@ -65,6 +75,7 @@ int main() {
                     system("clear");
                     puts("correcto! tu letra figura en la palabra");
                     primera = 0;
+                    puntajeRonda = 2;
                 }
                 palabraJugadorX[index] = intento;
             }
@@ -76,7 +87,10 @@ int main() {
             --vidas;
             system("clear");
             puts("Error: la letra no se encuentra en la palabra");
+            puntajeRonda = -1;
         }
+
+        escribirPuntaje(&puntajeRonda);
 
         sem_post(sem_letraMandada);
     }
@@ -89,4 +103,15 @@ char* getPalabraDeJuego() {
      * cual es la palabra de juego y comparar
      */
     return "palabra";
+}
+
+void escribirPuntaje(int* puntaje) {
+    size_t len = sizeof(int);
+    int shmid = 0;
+    int* addr = NULL;
+    key_t key = ftok("./puntajes", 'B');
+    shmid = shmget(key, len, IPC_CREAT);
+    addr = shmat(shmid, NULL, 0);
+
+    memcpy(addr, puntaje, sizeof(int));
 }

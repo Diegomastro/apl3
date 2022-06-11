@@ -20,6 +20,7 @@ int todosPierden(char* vidas, int numJugadores);
 int hayGanador(char* jugadores[], char* palabra);
 
 int main() {
+    int puntajes[] = {0,0,0};
     char *sem_cantJugadores_name = "cantJugadores";
     char *sem_partidaTerminada_name = "partidaTerminada";
     char *sem_turno1_name = "turno1";
@@ -58,7 +59,6 @@ int main() {
     } //esperamos por la cantidad de jugadores
     // PALABRA A ADIVINAR, despues habra que poner la logica para buscarlas de un archivo
     char palabra[] = "palabra";
-    char palabraX[] = "*******";
     char* jugadores[] = {
         crearMemoriaJugador("./jug_1", 'X'),
         crearMemoriaJugador("./jug_2", 'Y'),
@@ -66,18 +66,35 @@ int main() {
     };
     int ganador = -1;
     int turno = 0;
-    
-    crearPalabraJuego(palabra, palabraJuego);
 
-    while ((ganador = hayGanador(jugadores, palabra)) == -1 && !todosPierden(vidasJugadores, numJugadores)) {
+    int* puntajeDeRonda = getMemoriaPuntaje();
+
+    while (!todosPierden(vidasJugadores, numJugadores)) {
         printf("Turno del jugador %d", turno+1);
         sem_post(sem_turnos[turno]);
         sem_wait(sem_letraMandada);//semaforo señalizando que se mandó la letra
+        int puntajeGanado = *puntajeDeRonda;
+        puntajes[turno] += puntajeGanado;
+
+        if (puntajeGanado < 0) {
+            --vidasJugadores[turno];
+        }
         ++turno;
         turno %= cantJugadores;  // va de 0 a 2
     }
 
     return 0;
+}
+
+int* getMemoriaPuntajeGanado() {
+    size_t len = sizeof(int);
+    int shmid = 0;
+    int* addr = NULL;
+    key_t key = ftok("./puntajes", 'B');
+    shmid = shmget(key, len, IPC_CREAT);
+    addr = shmat(shmid, NULL, 0);
+
+    return addr;
 }
 
 int todosPierden(char* vidas, int numJugadores) {
