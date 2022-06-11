@@ -15,6 +15,6 @@ int main() {
 
     //agarrar pedazo de memoria segun su id
 
-    strcat("jug_",id+'0');
+    //strcat("jug_",id+'0');
     return 0;
 }
