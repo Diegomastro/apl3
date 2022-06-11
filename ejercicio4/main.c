@@ -19,7 +19,8 @@ int todosPierden(char* vidas, int numJugadores);
 int hayGanador(char* jugadores[], char* palabra);
 int maxIndex(int arr[], int size);
 void finalPartida(int puntajes[], int size);
-void mostrarEstado(char*[], int[],int);
+void mostrarEstado(char*, int[],int);
+int* getMemoriaPuntajeGanado();
 
 int main() {
     int puntajes[] = {0,0,0};
@@ -35,6 +36,8 @@ int main() {
     sem_unlink(sem_turno1_name);
     sem_unlink(sem_turno2_name);
     sem_unlink(sem_turno3_name);
+    sem_unlink(sem_partidaTerminada_name);
+    sem_unlink(sem_letraMandada_name);
 
     sem_t* sem_cantJugadores = sem_open(sem_cantJugadores_name, O_CREAT, 0600, 0);
     sem_t* sem_partidaTerminada = sem_open(sem_partidaTerminada_name, O_CREAT, 0600, 0);
@@ -47,30 +50,29 @@ int main() {
     
     int cantJugadores;
     sem_getvalue(sem_cantJugadores, &cantJugadores);
-    int numJugadores;
+    int numJugadores = 0;
     char* vidasJugadores = crearMemoriaJugadores();
 
-    printf("Ingrese el numero de jugadores\n");
-    scanf("%d", &numJugadores);
-    char estanTodos = 0;
-    puts("esperando que se conecten todos los jugadores");
-    while (numJugadores != cantJugadores) {
-            sleep(2);
-            sem_getvalue(sem_cantJugadores, &cantJugadores);
-            printf("jugadores: %d \n", cantJugadores);
-    } //esperamos por la cantidad de jugadores
-    // PALABRA A ADIVINAR, despues habra que poner la logica para buscarlas de un archivo
     char palabra[] = "palabra";
     char* jugadores[] = {
         crearMemoriaJugador("./jug_1", 'X'),
-        crearMemoriaJugador("./jug_2", 'Y'),
-        crearMemoriaJugador("./jug_3", 'Z')
+        crearMemoriaJugador("./jug_2", 'X'),
+        crearMemoriaJugador("./jug_3", 'X')
     };
     int ganador = -1;
     int turno = 0;
+    int* puntajeDeRonda = getMemoriaPuntajeGanado();
 
-
-    int* puntajeDeRonda = getMemoriaPuntaje();
+    printf("Ingrese el numero de jugadores\n");
+    numJugadores = getchar() - '0'; 
+    char estanTodos = 0;
+    puts("esperando que se conecten todos los jugadores");
+    while (numJugadores != cantJugadores) {
+        sleep(2);
+        sem_getvalue(sem_cantJugadores, &cantJugadores);
+        printf("jugadores: %d \n", cantJugadores);
+    } //esperamos por la cantidad de jugadores
+    // PALABRA A ADIVINAR, despues habra que poner la logica para buscarlas de un archivo
 
     while (!todosPierden(vidasJugadores, numJugadores)) {
         printf("Turno del jugador %d", turno+1);
@@ -161,8 +163,8 @@ int maxIndex(int arr[], int size) {
     return index;
 }
 
-void mostrarEstado(char* vidas[], int puntajes[], int cantJugadores) {
+void mostrarEstado(char* vidas, int puntajes[], int cantJugadores) {
     for (int i = 0; i < cantJugadores; ++i) {
-        printf("Estado del jugador %d:\nvidas: %d\tpuntaje: %d\n\n", i+1, vidas[i], puntajes[i]);
+        printf("Estado del jugador %d:\nvidas: %d\tpuntaje: %d\n\n", i+1, (int)vidas[i], puntajes[i]);
     }
 }

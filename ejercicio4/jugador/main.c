@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <semaphore.h>
 #include <string.h>
+#include <unistd.h>
 #define MAX_PALABRA 8
 
 char* getPalabraDeJuego();
@@ -33,20 +34,25 @@ int main() {
 
     sem_getvalue(sem_partidaTerminada, &partidaTerminada);
 
-    char pathAMemoria[] = "jug_*";
-    pathAMemoria[4] = id+'0';
-    puts(pathAMemoria);
+    char pathAMemoria[] = "./jug_*";
+    pathAMemoria[6] = id+'0';
+    
     size_t len = MAX_PALABRA; // tam maximo de una palabra (sera una constante)
     int shmid = 0;
     char* palabraJugadorX = NULL;
-    key_t key = ftok(pathAMemoria,id);
+    key_t key = ftok(pathAMemoria, 'X');
     shmid = shmget(key, len, IPC_CREAT);
     palabraJugadorX = shmat(shmid, NULL, 0);
 
-    char* palabraDeJuego = getPalabraDeJuego();
+    // char* palabraDeJuego = getPalabraDeJuego();
+    char* palabraDeJuego = "palabra";
     int puntajeRonda = 0;
 
+    fflush(stdin);
+    puts("entro");
+    printf("partida terminada: %d", partidaTerminada);
     while (!partidaTerminada) {
+        sem_wait(sem_turno);
         if (vidas <= 0) {
             escribirPuntaje(0);
             sem_getvalue(sem_partidaTerminada, &partidaTerminada);
@@ -55,25 +61,26 @@ int main() {
             }
             continue;
         }
-        sem_wait(sem_turno);
         sem_getvalue(sem_partidaTerminada, &partidaTerminada);
         if (partidaTerminada) {
             break;
         }
+        fflush(stdin);
         puts("Es tu turno! tu palabra es:");
+        fflush(stdin);
         puts(palabraJugadorX);
-        puts("Es tu turno! ingrese un caracter");
+        fflush(stdin);
+        puts("ingrese un caracter");
 
-        char intento;
-        scanf("%c", &intento);
-
+        char intento = getchar();
         char* tmp = palabraDeJuego;
+        printf("TMP: %s\n", tmp);
         int primera = 1;
         int index = 0;
         while (*tmp) {
             if (*tmp == intento) {
                 if (primera) {
-                    system("clear");
+                    fflush(stdin);
                     puts("correcto! tu letra figura en la palabra");
                     primera = 0;
                     puntajeRonda = 2;
@@ -86,7 +93,6 @@ int main() {
 
         if (!primera) {
             --vidas;
-            system("clear");
             puts("Error: la letra no se encuentra en la palabra");
             puntajeRonda = -1;
         }
