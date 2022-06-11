@@ -28,22 +28,19 @@ int main() {
     // PALABRA A ADIVINAR, despues habra que poner la logica para buscarlas de un archivo
     char palabra[] = "palabra";
     char* jugadores[] = {
-        crearMemoriaJugador("/home/marco/sisop-apl/apl3/ejercicio4/jug_1", 'X'),
-        crearMemoriaJugador("/home/marco/sisop-apl/apl3/ejercicio4/jug_2", 'Y'),
-        crearMemoriaJugador("/home/marco/sisop-apl/apl3/ejercicio4/jug_3", 'Z')
+        crearMemoriaJugador("./jug_1", 'X'),
+        crearMemoriaJugador("./jug_2", 'Y'),
+        crearMemoriaJugador("./jug_3", 'Z')
     };
     int ganador = -1;
     int turno = 0;
     while ((ganador = hayGanador(jugadores, palabra)) == -1 && !todosPierden(vidasJugadores, numJugadores)) {
         // empieza turno
         /**
-         *  
-         * 
-         */
-        /**
-        subimos semaforo de que puede jugar el
-        jugador turno+1
+         * subimos semaforo de que puede jugar el
+         * jugador turno+1*  
         */
+        
         /** 
          * esperamos a que el proceso turno+1
          * suba el semaforo que ya termino
@@ -81,7 +78,7 @@ char* crearMemoriaJugadores() {
     size_t len = sizeof(char) * 3;
     int shmid = 0;
     char* addr = NULL;
-    key_t key = ftok("/home/marco/sisop-apl/apl3/ejercicio4/vidas_jugadores", 'B');
+    key_t key = ftok("./vidas_jugadores", 'B');
     shmid = shmget(key, len, IPC_CREAT);
     addr = shmat(shmid, NULL, 0);
 
@@ -107,7 +104,7 @@ char* crearMemoriaCantJugadores() {
     size_t len = sizeof(char);
     int shmid = 0;
     char* addr = NULL;
-    key_t key = ftok("/home/marco/sisop-apl/apl3/ejercicio4/cant_jugadores", 'A');
+    key_t key = ftok("./cant_jugadores", 'A');
     
     shmid = shmget(key, len, IPC_CREAT);
     addr = shmat(shmid, NULL, 0);
