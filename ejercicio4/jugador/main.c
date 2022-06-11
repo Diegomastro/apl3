@@ -7,13 +7,17 @@
 #include <string.h>
 #define MAX_PALABRA 21
 
+char* getPalabraDeJuego();
+
 int main() {
     const char *sem_cantJugadores_name = "cantJugadores";
+    const char *sem_letraMandada_name = "letraMandada";
+    sem_t* sem_letraMandada = sem_open(sem_letraMandada_name, 0);
     sem_t* sem_cantJugadores = sem_open(sem_cantJugadores_name, 0);
     sem_post(sem_cantJugadores);
     int id;
     sem_getvalue(sem_cantJugadores, &id);
-
+    int vidas = 6;
     char *sem_turno1_name = "turno1";
     char *sem_turno2_name = "turno2";
     char *sem_turno3_name = "turno3";
@@ -37,4 +41,52 @@ int main() {
     shmid = shmget(key, len, IPC_CREAT);
     palabraJugadorX = shmat(shmid, NULL, 0);
 
+    char* palabraDeJuego = getPalabraDeJuego();
+
+    while (!partidaTerminada) {
+        sem_wait(sem_turno);
+        sem_getvalue(sem_partidaTerminada, &partidaTerminada);
+        if (partidaTerminada) {
+            break;
+        }
+        puts("Es tu turno! tu palabra es:");
+        puts(palabraJugadorX);
+        puts("Es tu turno! ingrese un caracter");
+
+        char intento;
+        scanf("%c", &intento);
+
+        char* tmp = palabraDeJuego;
+        int primera = 1;
+        int index = 0;
+        while (*tmp) {
+            if (*tmp == intento) {
+                if (primera) {
+                    system("clear");
+                    puts("correcto! tu letra figura en la palabra");
+                    primera = 0;
+                }
+                palabraJugadorX[index] = intento;
+            }
+            ++index;
+            ++tmp;
+        }
+
+        if (!primera) {
+            --vidas;
+            system("clear");
+            puts("Error: la letra no se encuentra en la palabra");
+        }
+
+        sem_post(sem_letraMandada);
+    }
+
+}
+
+char* getPalabraDeJuego() {
+    /**
+     * aca esta la logica para ver
+     * cual es la palabra de juego y comparar
+     */
+    return "palabra";
 }
