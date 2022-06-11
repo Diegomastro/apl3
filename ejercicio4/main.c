@@ -21,6 +21,7 @@ int maxIndex(int arr[], int size);
 void finalPartida(int puntajes[], int size);
 void mostrarEstado(char*, int[],int);
 int* getMemoriaPuntajeGanado();
+int todosGanan(char* jugadores[], int numJugadores);
 
 int main() {
     int puntajes[] = {0,0,0};
@@ -74,7 +75,7 @@ int main() {
     } //esperamos por la cantidad de jugadores
     // PALABRA A ADIVINAR, despues habra que poner la logica para buscarlas de un archivo
 
-    while (!todosPierden(vidasJugadores, numJugadores)) {
+    while (!todosPierden(vidasJugadores, numJugadores) && !todosGanan(jugadores, numJugadores)) {
         printf("Turno del jugador %d", turno+1);
         sem_post(sem_turnos[turno]);
         sem_wait(sem_letraMandada);//semaforo señalizando que se mandó la letra
@@ -85,10 +86,10 @@ int main() {
             --vidasJugadores[turno];
         }
         ++turno;
-        turno %= cantJugadores;  // va de 0 a 2
+        turno %= cantJugadores;
         mostrarEstado(vidasJugadores, puntajes, numJugadores);
     }
-
+    puts("passed here");
     sem_post(sem_partidaTerminada);
     for (int i = 0; i < 3; ++i) {
         sem_post(sem_turnos[i]);
@@ -97,6 +98,22 @@ int main() {
     finalPartida(puntajes, numJugadores);
 
     return 0;
+}
+
+int todosGanan(char* jugadores[], int numJugadores) {
+    printf("numJugadores = %d\n", numJugadores);
+    for (int i = 0; i < numJugadores; ++i) {
+        puts(jugadores[i]);
+        char* palabraActual = jugadores[i];
+
+        while (*palabraActual) {
+            if (*palabraActual == '*') {
+                return 0;
+            }
+        }
+    }
+    puts("Termino");
+    return 1;
 }
 
 int* getMemoriaPuntajeGanado() {
