@@ -87,6 +87,13 @@ int main() {
         mostrarEstado(vidasJugadores, puntajes, numJugadores);
     }
 
+    sem_post(sem_partidaTerminada);
+    for (int i = 0; i < 3; ++i) {
+        sem_post(sem_turnos[i]);
+    }
+
+    finalPartida(puntajes, numJugadores);
+
     return 0;
 }
 
@@ -135,20 +142,19 @@ char* crearMemoriaJugador(char* path, char id) {
 }
 
 void finalPartida(int puntajes[], int size) {
-    for (int i = 0; i < size; ++i)
-    {
+    system("clear");
+    for (int i = 0; i < size; ++i) {
         printf("Jugador %d: %d Pts.", i+1, puntajes[i]);
     }
     printf("Ganador: jugador %d", maxIndex(puntajes, size));
 }
 
 int maxIndex(int arr[], int size) {
-    maxNum = -99999;
-    index = 0;
-    for (int i = 0; i < size; ++i)
-    {
+    int maxNum = -99999;
+    int index = 0;
+    for (int i = 0; i < size; ++i) {
         if (arr[i] > maxNum) {
-            maxNum = arr[i]
+            maxNum = arr[i];
             index = i;
         }
     }
@@ -157,6 +163,6 @@ int maxIndex(int arr[], int size) {
 
 void mostrarEstado(char* vidas[], int puntajes[], int cantJugadores) {
     for (int i = 0; i < cantJugadores; ++i) {
-        printf("Estado del jugador %d:\nvidas: %d\tpuntaje: %d\n", i+1, vidas[i], puntajes[i]);
+        printf("Estado del jugador %d:\nvidas: %d\tpuntaje: %d\n\n", i+1, vidas[i], puntajes[i]);
     }
 }

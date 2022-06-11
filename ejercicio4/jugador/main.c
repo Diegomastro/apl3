@@ -8,11 +8,8 @@
 #define MAX_PALABRA 21
 
 char* getPalabraDeJuego();
-<<<<<<< HEAD
 void finalPartida();
-=======
 void escribirPuntaje(int*);
->>>>>>> 79bee8127d38de6ed206c7d92ebe40adde02a742
 
 int main() {
     const char *sem_cantJugadores_name = "cantJugadores";
@@ -109,11 +106,10 @@ char* getPalabraDeJuego() {
     return "palabra";
 }
 
-<<<<<<< HEAD
 void finalPartida() {
     //tendria que recibir la string entera del server
 }
-=======
+
 void escribirPuntaje(int* puntaje) {
     size_t len = sizeof(int);
     int shmid = 0;
@@ -124,4 +120,3 @@ void escribirPuntaje(int* puntaje) {
 
     memcpy(addr, puntaje, sizeof(int));
 }
->>>>>>> 79bee8127d38de6ed206c7d92ebe40adde02a742
