@@ -34,7 +34,7 @@ int main() {
     };
     int ganador = -1;
     int turno = 0;
-    while ((ganador = hayGanador(jugadores, palabra)) == -1 && !todoPierden(vidasJugadores, numJugadores)) {
+    while ((ganador = hayGanador(jugadores, palabra)) == -1 && !todosPierden(vidasJugadores, numJugadores)) {
         // empieza turno
         /**
          *  
