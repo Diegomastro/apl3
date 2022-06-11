@@ -48,7 +48,6 @@ int main() {
     char* palabraDeJuego = "palabra";
     int puntajeRonda = 0;
 
-    fflush(stdin);
     puts("entro");
     printf("partida terminada: %d", partidaTerminada);
     while (!partidaTerminada) {
@@ -65,22 +64,19 @@ int main() {
         if (partidaTerminada) {
             break;
         }
-        fflush(stdin);
         puts("Es tu turno! tu palabra es:");
-        fflush(stdin);
         puts(palabraJugadorX);
-        fflush(stdin);
         puts("ingrese un caracter");
 
-        char intento = getchar();
+        char intento;
+        scanf(" %c", &intento);
+        getchar();
         char* tmp = palabraDeJuego;
-        printf("TMP: %s\n", tmp);
         int primera = 1;
         int index = 0;
         while (*tmp) {
             if (*tmp == intento) {
                 if (primera) {
-                    fflush(stdin);
                     puts("correcto! tu letra figura en la palabra");
                     primera = 0;
                     puntajeRonda = 2;
@@ -91,7 +87,7 @@ int main() {
             ++tmp;
         }
 
-        if (!primera) {
+        if (primera) {
             --vidas;
             puts("Error: la letra no se encuentra en la palabra");
             puntajeRonda = -1;
@@ -102,14 +98,6 @@ int main() {
         sem_post(sem_letraMandada);
     }
 
-}
-
-char* getPalabraDeJuego() {
-    /**
-     * aca esta la logica para ver
-     * cual es la palabra de juego y comparar
-     */
-    return "palabra";
 }
 
 void finalPartida() {
