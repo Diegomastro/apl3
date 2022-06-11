@@ -8,7 +8,7 @@
 #define MAX_PALABRA 21
 
 int main() {
-	const char *sem_cantJugadores_name = "cantJugadores";
+    const char *sem_cantJugadores_name = "cantJugadores";
     sem_t* sem_cantJugadores = sem_open(sem_cantJugadores_name, 0);
     sem_post(sem_cantJugadores);
     int id;
@@ -17,12 +17,15 @@ int main() {
     char *sem_turno1_name = "turno1";
     char *sem_turno2_name = "turno2";
     char *sem_turno3_name = "turno3";
-
+    char *sem_partidaTerminada_name = "partidaTerminada";
     char *sem_names[] = {sem_turno1_name, sem_turno2_name, sem_turno3_name};
 
    
     sem_t* sem_turno = sem_open(sem_names[id-1], 0);
+    sem_t* sem_partidaTerminada = sem_open(sem_partidaTerminada_name, 0);
+    int partidaTerminada = 0;
 
+    sem_getvalue(sem_partidaTerminada, &partidaTerminada);
 
     char pathAMemoria[] = "jug_*";
     pathAMemoria[4] = id+'0';
@@ -34,12 +37,4 @@ int main() {
     shmid = shmget(key, len, IPC_CREAT);
     palabraJugadorX = shmat(shmid, NULL, 0);
 
-
-	while (1) {
-		puts("Espera tu turno..");
-		sem_wait(sem_turno);
-		//jugar turno
-	}
-
-    return 0;
 }
