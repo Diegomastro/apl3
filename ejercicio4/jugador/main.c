@@ -8,6 +8,7 @@
 #define MAX_PALABRA 21
 
 char* getPalabraDeJuego();
+void finalPartida();
 
 int main() {
     const char *sem_cantJugadores_name = "cantJugadores";
@@ -89,4 +90,8 @@ char* getPalabraDeJuego() {
      * cual es la palabra de juego y comparar
      */
     return "palabra";
+}
+
+void finalPartida() {
+    //tendria que recibir la string entera del server
 }

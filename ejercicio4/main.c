@@ -18,6 +18,8 @@ char* crearMemoriaJugador(char* path, char id);
 
 int todosPierden(char* vidas, int numJugadores);
 int hayGanador(char* jugadores[], char* palabra);
+int maxIndex(int arr[], int size);
+void finalPartida(int puntajes[], int size);
 
 int main() {
     char *sem_cantJugadores_name = "cantJugadores";
@@ -58,7 +60,6 @@ int main() {
     } //esperamos por la cantidad de jugadores
     // PALABRA A ADIVINAR, despues habra que poner la logica para buscarlas de un archivo
     char palabra[] = "palabra";
-    char palabraX[] = "*******";
     char* jugadores[] = {
         crearMemoriaJugador("./jug_1", 'X'),
         crearMemoriaJugador("./jug_2", 'Y'),
@@ -67,7 +68,6 @@ int main() {
     int ganador = -1;
     int turno = 0;
     
-    crearPalabraJuego(palabra, palabraJuego);
 
     while ((ganador = hayGanador(jugadores, palabra)) == -1 && !todosPierden(vidasJugadores, numJugadores)) {
         printf("Turno del jugador %d", turno+1);
@@ -123,4 +123,23 @@ char* crearMemoriaJugador(char* path, char id) {
 
 }
 
+void finalPartida(int puntajes[], int size) {
+    for (int i = 0; i < size; ++i)
+    {
+        printf("Jugador %d: %d Pts.", i+1, puntajes[i]);
+    }
+    printf("Ganador: jugador %d", maxIndex(puntajes, size));
+}
 
+int maxIndex(int arr[], int size) {
+    maxNum = -99999;
+    index = 0;
+    for (int i = 0; i < size; ++i)
+    {
+        if (arr[i] > maxNum) {
+            maxNum = arr[i]
+            index = i;
+        }
+    }
+    return index;
+}
