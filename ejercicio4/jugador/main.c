@@ -6,6 +6,7 @@
 #include <semaphore.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
 #define MAX_PALABRA 8
 
 char* getPalabraDeJuego();
@@ -13,6 +14,7 @@ void finalPartida();
 void escribirPuntaje(int*);
 int adivinoPalabra(char* palabraX);
 int murio(int vidas);
+int getResultadoFinal();
 
 int main() {
     const char *sem_cantJugadores_name = "cantJugadores";
@@ -30,10 +32,12 @@ int main() {
     char *sem_turno3_name = "turno3";
     char *sem_partidaTerminada_name = "partidaTerminada";
     char *sem_names[] = {sem_turno1_name, sem_turno2_name, sem_turno3_name};
+    char* sem_resultado_name = "resultadoPartida";
 
    
     sem_t* sem_turno = sem_open(sem_names[id-1], 0);
     sem_t* sem_partidaTerminada = sem_open(sem_partidaTerminada_name, 0);
+    sem_t* sem_resultado = sem_open(sem_resultado_name, 0);
     int partidaTerminada = 0;
 
     sem_getvalue(sem_partidaTerminada, &partidaTerminada);
@@ -77,7 +81,7 @@ int main() {
             int primera = 1;
             int index = 0;
             while (*tmp) {
-                if (*tmp == intento) {
+                if (*tmp == intento && palabraJugadorX[index] == '*') {
                     if (primera) {
                         puts("correcto! tu letra figura en la palabra");
                         fflush(stdout);
@@ -132,12 +136,36 @@ int main() {
         sem_post(sem_letraMandada);
     }
 
-    finalPartida();
+    sem_wait(sem_resultado);
+
+    int resultado = getResultadoFinal();
+    finalPartida(resultado, id);
 }
 
-void finalPartida() {
-    //MARQUITO completame esto
+int getResultadoFinal() {
+    int res;
+    size_t len = sizeof(int); // tam maximo de una palabra (sera una constante)
+    int shmid = 0;
+    char* addr = NULL;
+    key_t key = ftok("./resultado", 'X');
+    shmid = shmget(key, len, IPC_CREAT);
+    addr = shmat(shmid, NULL, 0);
+    memcpy(&res, addr, len);
+
+    return res;
+}
+
+void finalPartida(int resultado, int id) {
+    //MARQUITO completame esto -> listo rey
     // leer la memoria compartida del jugador y printearla
+
+    if (resultado != id) {
+        system("clear");
+        printf("Has perdido, el ganador es el jugador %d, mejor suerte la proxima!", id);
+        return;
+    }
+    system("clear");
+    printf("Felicidades jugador %d, eres el gandor!", id);
 }
 
 void escribirPuntaje(int* puntaje) {

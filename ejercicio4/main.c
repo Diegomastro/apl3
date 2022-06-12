@@ -18,10 +18,11 @@ char* crearMemoriaJugador(char* path, char id);
 int todosPierden(char* vidas, int numJugadores);
 int hayGanador(char* jugadores[], char* palabra);
 int maxIndex(int arr[], int size);
-void finalPartida(int puntajes[], int size);
+void finalPartida(int puntajes[], int size, sem_t* sem_resultado);
 void mostrarEstado(char*, int[],int);
 int* getMemoriaPuntajeGanado();
 int todosGanan(char* jugadores[], int numJugadores);
+void darResultadoJugador(int* ganador, sem_t* sem_resultado);
 
 int main() {
     int puntajes[] = {0,0,0};
@@ -33,6 +34,7 @@ int main() {
     char *sem_letraMandada_name = "letraMandada";
     char *sem_names[] = {sem_turno1_name, sem_turno2_name, sem_turno3_name};
     char *sem_jugadoresTerminados_name = "JugadoresTerminados";
+    char* sem_resultado_name = "resultadoPartida";
     
     sem_unlink(sem_cantJugadores_name);
     sem_unlink(sem_turno1_name);
@@ -41,6 +43,7 @@ int main() {
     sem_unlink(sem_partidaTerminada_name);
     sem_unlink(sem_letraMandada_name);
     sem_unlink(sem_jugadoresTerminados_name);
+    sem_unlink(sem_resultado_name);
 
     sem_t* sem_cantJugadores = sem_open(sem_cantJugadores_name, O_CREAT, 0600, 0);
     sem_t* sem_partidaTerminada = sem_open(sem_partidaTerminada_name, O_CREAT, 0600, 0);
@@ -49,6 +52,7 @@ int main() {
     sem_t* sem_turno2 = sem_open(sem_turno2_name, O_CREAT, 0600, 0);
     sem_t* sem_turno3 = sem_open(sem_turno3_name, O_CREAT, 0600, 0);
     sem_t* sem_jugadoresTerminados = sem_open(sem_jugadoresTerminados_name, O_CREAT, 0600, 0);
+    sem_t* sem_resultado = sem_open(sem_resultado_name, O_CREAT, 0600, 0);
     
     sem_t* sem_turnos[] = {sem_turno1, sem_turno2, sem_turno3};
 
@@ -63,8 +67,7 @@ int main() {
     int numJugadores = 0;
     char* vidasJugadores = crearMemoriaJugadores();
 
-    char palabra[] = "palabra";
-    char* jugadores[] = {
+    char palabra[] = "palabra"; char* jugadores[] = {
         crearMemoriaJugador("./jug_1", 'X'),
         crearMemoriaJugador("./jug_2", 'X'),
         crearMemoriaJugador("./jug_3", 'X')
@@ -107,17 +110,14 @@ int main() {
         mostrarEstado(vidasJugadores, puntajes, numJugadores);
     }
 
-    puts("passed here");
     sem_post(sem_partidaTerminada); // CREO que no lo estoy usando, por las dudas igual queda
     for (int i = 0; i < 3; ++i) {
         sem_post(sem_turnos[i]);
     }
 
-    finalPartida(puntajes, numJugadores);
-
+    finalPartida(puntajes, numJugadores, sem_resultado);
     return 0;
 }
-
 
 int todosGanan(char* jugadores[], int numJugadores) {
     printf("numJugadores = %d\n", numJugadores);
@@ -179,14 +179,31 @@ char* crearMemoriaJugador(char* path, char id) {
     return addr;
 }
 
-void finalPartida(int puntajes[], int size) {
+void finalPartida(int puntajes[], int size, sem_t* sem_resultado) {
     // MARQUITO completame esto
     // ademas de printearlo, que cree una string con esto y se lo mande a cada jugador por memoria compartida
     system("clear");
     for (int i = 0; i < size; ++i) {
         printf("Jugador %d: %d Pts.", i+1, puntajes[i]);
     }
-    printf("Ganador: jugador %d", maxIndex(puntajes, size)+1);
+    puts("");
+    int ganador = maxIndex(puntajes, size)+1;
+
+    printf("Ganador: jugador %d", ganador);
+
+    darResultadoJugador(&ganador, sem_resultado);
+}
+
+void darResultadoJugador(int* ganador, sem_t* sem_resultado) {
+    size_t len = sizeof(int); // tam maximo de una palabra (sera una constante)
+    int shmid = 0;
+    char* addr = NULL;
+    key_t key = ftok("./resultado", 'X');
+    shmid = shmget(key, len, IPC_CREAT);
+    addr = shmat(shmid, NULL, 0);
+    memcpy(addr, ganador, sizeof(int));
+
+    sem_post(sem_resultado);
 }
 
 int maxIndex(int arr[], int size) {
