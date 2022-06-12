@@ -32,13 +32,15 @@ int main() {
     char *sem_turno3_name = "turno3";
     char *sem_letraMandada_name = "letraMandada";
     char *sem_names[] = {sem_turno1_name, sem_turno2_name, sem_turno3_name};
-
+    char *sem_jugadoresTerminados_name = "JugadoresTerminados";
+    
     sem_unlink(sem_cantJugadores_name);
     sem_unlink(sem_turno1_name);
     sem_unlink(sem_turno2_name);
     sem_unlink(sem_turno3_name);
     sem_unlink(sem_partidaTerminada_name);
     sem_unlink(sem_letraMandada_name);
+    sem_unlink(sem_jugadoresTerminados_name);
 
     sem_t* sem_cantJugadores = sem_open(sem_cantJugadores_name, O_CREAT, 0600, 0);
     sem_t* sem_partidaTerminada = sem_open(sem_partidaTerminada_name, O_CREAT, 0600, 0);
@@ -46,11 +48,18 @@ int main() {
     sem_t* sem_turno1 = sem_open(sem_turno1_name, O_CREAT, 0600, 0);
     sem_t* sem_turno2 = sem_open(sem_turno2_name, O_CREAT, 0600, 0);
     sem_t* sem_turno3 = sem_open(sem_turno3_name, O_CREAT, 0600, 0);
+    sem_t* sem_jugadoresTerminados = sem_open(sem_jugadoresTerminados_name, O_CREAT, 0600, 0);
     
     sem_t* sem_turnos[] = {sem_turno1, sem_turno2, sem_turno3};
-    
+
     int cantJugadores;
+    int jugadoresTerminados;
+
     sem_getvalue(sem_cantJugadores, &cantJugadores);
+    sem_getvalue(sem_jugadoresTerminados, &jugadoresTerminados);
+    
+
+
     int numJugadores = 0;
     char* vidasJugadores = crearMemoriaJugadores();
 
@@ -65,6 +74,7 @@ int main() {
     int* puntajeDeRonda = getMemoriaPuntajeGanado();
 
     printf("Ingrese el numero de jugadores\n");
+
     numJugadores = getchar() - '0'; 
     char estanTodos = 0;
     puts("esperando que se conecten todos los jugadores");
@@ -75,8 +85,11 @@ int main() {
     } //esperamos por la cantidad de jugadores
     // PALABRA A ADIVINAR, despues habra que poner la logica para buscarlas de un archivo
 
-    while (!todosPierden(vidasJugadores, numJugadores) && !todosGanan(jugadores, numJugadores)) {
-        printf("Turno del jugador %d", turno+1);
+    //while (!todosPierden(vidasJugadores, numJugadores) && !todosGanan(jugadores, numJugadores)) {
+    sem_getvalue(sem_jugadoresTerminados, &jugadoresTerminados);
+    while (jugadoresTerminados != cantJugadores) {
+        printf("Turno del jugador %d\n", turno+1);
+        fflush(stdout);
         sem_post(sem_turnos[turno]);
         sem_wait(sem_letraMandada);//semaforo señalizando que se mandó la letra
         int puntajeGanado = *puntajeDeRonda;
@@ -87,10 +100,15 @@ int main() {
         }
         ++turno;
         turno %= cantJugadores;
+        system("clear");
+        sem_getvalue(sem_jugadoresTerminados, &jugadoresTerminados);
+        printf("jugadores terminados: %d\n", jugadoresTerminados);
+        fflush(stdout);
         mostrarEstado(vidasJugadores, puntajes, numJugadores);
     }
+
     puts("passed here");
-    sem_post(sem_partidaTerminada);
+    sem_post(sem_partidaTerminada); // CREO que no lo estoy usando, por las dudas igual queda
     for (int i = 0; i < 3; ++i) {
         sem_post(sem_turnos[i]);
     }
@@ -99,6 +117,7 @@ int main() {
 
     return 0;
 }
+
 
 int todosGanan(char* jugadores[], int numJugadores) {
     printf("numJugadores = %d\n", numJugadores);
@@ -161,11 +180,13 @@ char* crearMemoriaJugador(char* path, char id) {
 }
 
 void finalPartida(int puntajes[], int size) {
+    // MARQUITO completame esto
+    // ademas de printearlo, que cree una string con esto y se lo mande a cada jugador por memoria compartida
     system("clear");
     for (int i = 0; i < size; ++i) {
         printf("Jugador %d: %d Pts.", i+1, puntajes[i]);
     }
-    printf("Ganador: jugador %d", maxIndex(puntajes, size));
+    printf("Ganador: jugador %d", maxIndex(puntajes, size)+1);
 }
 
 int maxIndex(int arr[], int size) {
@@ -183,5 +204,6 @@ int maxIndex(int arr[], int size) {
 void mostrarEstado(char* vidas, int puntajes[], int cantJugadores) {
     for (int i = 0; i < cantJugadores; ++i) {
         printf("Estado del jugador %d:\nvidas: %d\tpuntaje: %d\n\n", i+1, (int)vidas[i], puntajes[i]);
+        fflush(stdout);
     }
 }

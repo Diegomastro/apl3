@@ -11,10 +11,14 @@
 char* getPalabraDeJuego();
 void finalPartida();
 void escribirPuntaje(int*);
+int adivinoPalabra(char* palabraX);
+int murio(int vidas);
 
 int main() {
     const char *sem_cantJugadores_name = "cantJugadores";
     const char *sem_letraMandada_name = "letraMandada";
+    const char *sem_jugadoresTerminados_name = "JugadoresTerminados";
+    sem_t* sem_jugadoresTerminados = sem_open(sem_jugadoresTerminados_name, 0);
     sem_t* sem_letraMandada = sem_open(sem_letraMandada_name, 0);
     sem_t* sem_cantJugadores = sem_open(sem_cantJugadores_name, 0);
     sem_post(sem_cantJugadores);
@@ -47,61 +51,93 @@ int main() {
     // char* palabraDeJuego = getPalabraDeJuego();
     char* palabraDeJuego = "palabra";
     int puntajeRonda = 0;
+    int nuncaMando = 1;
+    int cantJugadores;
+    int jugadoresTerminados;
 
     puts("entro");
     printf("partida terminada: %d", partidaTerminada);
     while (!partidaTerminada) {
         sem_wait(sem_turno);
-        if (vidas <= 0) {
-            escribirPuntaje(0);
+
+        if (!adivinoPalabra(palabraJugadorX) && !murio(vidas)) {
             sem_getvalue(sem_partidaTerminada, &partidaTerminada);
             if (partidaTerminada) {
                 break;
             }
-            continue;
-        }
-        sem_getvalue(sem_partidaTerminada, &partidaTerminada);
-        if (partidaTerminada) {
-            break;
-        }
-        puts("Es tu turno! tu palabra es:");
-        puts(palabraJugadorX);
-        puts("ingrese un caracter");
+            puts("Es tu turno! tu palabra es:");
+            puts(palabraJugadorX);
+            puts("ingrese un caracter");
+            fflush(stdout);
 
-        char intento;
-        scanf(" %c", &intento);
-        getchar();
-        char* tmp = palabraDeJuego;
-        int primera = 1;
-        int index = 0;
-        while (*tmp) {
-            if (*tmp == intento) {
-                if (primera) {
-                    puts("correcto! tu letra figura en la palabra");
-                    primera = 0;
-                    puntajeRonda = 2;
+            char intento;
+            scanf(" %c", &intento);
+            getchar();
+            char* tmp = palabraDeJuego;
+            int primera = 1;
+            int index = 0;
+            while (*tmp) {
+                if (*tmp == intento) {
+                    if (primera) {
+                        puts("correcto! tu letra figura en la palabra");
+                        fflush(stdout);
+                        primera = 0;
+                        puntajeRonda = 2;
+                    }
+                    palabraJugadorX[index] = intento;
                 }
-                palabraJugadorX[index] = intento;
+                ++index;
+                ++tmp;
             }
-            ++index;
-            ++tmp;
-        }
 
-        if (primera) {
-            --vidas;
-            puts("Error: la letra no se encuentra en la palabra");
-            puntajeRonda = -1;
-        }
+            if (primera) {
+                --vidas;
+                puts("Error: la letra no se encuentra en la palabra");
+                fflush(stdout);
+                puntajeRonda = -1;
+            }
 
-        escribirPuntaje(&puntajeRonda);
+            if (murio(vidas)) {
+                puntajeRonda = 0;
+                escribirPuntaje(&puntajeRonda);
+                puts("Aurcado! Esperando a que los demas jugadores terminen");
+                fflush(stdout);
+            } else {
+                escribirPuntaje(&puntajeRonda);    
+            }
+
+            if (adivinoPalabra(palabraJugadorX)) {
+                puts("Adivinaste! Esperando a que los demas jugadores terminen");
+                fflush(stdout);
+            }
+            
+        } else { // si ya termino, sea pq murio o adivino la palabra
+
+            if (nuncaMando) {
+                sem_post(sem_jugadoresTerminados); // mando que termino UNA SOLA VEZ
+                nuncaMando = 0;
+            }
+
+            // si ya terminaron todos, salir del loop.
+            sem_getvalue(sem_cantJugadores, &cantJugadores);
+            sem_getvalue(sem_jugadoresTerminados, &jugadoresTerminados);
+            if (cantJugadores == jugadoresTerminados) {  // asqueroso esto eh
+                sem_post(sem_letraMandada);
+                break; 
+            }
+
+            
+        }
 
         sem_post(sem_letraMandada);
     }
 
+    finalPartida();
 }
 
 void finalPartida() {
-    //tendria que recibir la string entera del server
+    //MARQUITO completame esto
+    // leer la memoria compartida del jugador y printearla
 }
 
 void escribirPuntaje(int* puntaje) {
@@ -113,4 +149,19 @@ void escribirPuntaje(int* puntaje) {
     addr = shmat(shmid, NULL, 0);
 
     memcpy(addr, puntaje, sizeof(int));
+}
+
+int adivinoPalabra(char* palabraX) {
+    for (int i = 0; i < MAX_PALABRA; ++i)
+    {
+        if (palabraX[i] == '*') {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+int murio(int vidas) {
+    return (vidas <= 0);
 }
