@@ -8,7 +8,9 @@
 #include <semaphore.h>
 #include <unistd.h>
 #include <signal.h>
+#include <time.h>
 #define MAX_PALABRA 8
+#define CANT_PALABRAS 15
 
 const char PALABRA_INICIAL[MAX_PALABRA] = "*******";
 
@@ -25,6 +27,8 @@ int* getMemoriaPuntajeGanado();
 int todosGanan(char* jugadores[], int numJugadores);
 void darResultadoJugador(int* ganador, sem_t* sem_resultado);
 void registrarSeniales();
+void leerPalabra(char* buffer);
+
 int main() {
     registrarSeniales();
     int puntajes[] = {0,0,0};
@@ -69,7 +73,9 @@ int main() {
     int numJugadores = 0;
     char* vidasJugadores = crearMemoriaJugadores();
 
-    char palabra[] = "palabra"; char* jugadores[] = {
+    char palabra[MAX_PALABRA]; 
+    leerPalabra(palabra);
+    char* jugadores[] = {
         crearMemoriaJugador("./jug_1", 'X'),
         crearMemoriaJugador("./jug_2", 'X'),
         crearMemoriaJugador("./jug_3", 'X')
@@ -119,6 +125,31 @@ int main() {
 
     finalPartida(puntajes, numJugadores, sem_resultado);
     return 0;
+}
+
+void leerPalabra(char* buffer) {
+    FILE* textfile;
+    srand(time(NULL));
+    int indiceRandom = rand() % CANT_PALABRAS;
+    int indice = 0;    
+    textfile = fopen("palabras.txt", "r");
+    while(fgets(buffer, MAX_PALABRA, textfile)){
+        if (indice == indiceRandom) {
+            break;
+        }
+        ++indice;
+    }
+     
+    fclose(textfile);
+
+    size_t len = MAX_PALABRA;
+    int shmid = 0;
+    char* addr = NULL;
+    key_t key = ftok("./palabraDeJuego", 'X');
+    shmid = shmget(key, len, IPC_CREAT);
+    addr = shmat(shmid, NULL, 0);
+
+    memcpy(addr, buffer, len);
 }
 
 void signal_sigint(int signum) {

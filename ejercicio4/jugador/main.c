@@ -52,8 +52,7 @@ int main() {
     shmid = shmget(key, len, IPC_CREAT);
     palabraJugadorX = shmat(shmid, NULL, 0);
 
-    // char* palabraDeJuego = getPalabraDeJuego();
-    char* palabraDeJuego = "palabra";
+    char* palabraDeJuego = getPalabraDeJuego();
     int puntajeRonda = 0;
     int nuncaMando = 1;
     int cantJugadores;
@@ -140,6 +139,19 @@ int main() {
 
     int resultado = getResultadoFinal();
     finalPartida(resultado, id);
+    
+    return 0;
+}
+
+char* getPalabraDeJuego() {
+    size_t len = MAX_PALABRA;
+    int shmid = 0;
+    char* addr = NULL;
+    key_t key = ftok("./palabraDeJuego", 'X');
+    shmid = shmget(key, len, IPC_CREAT);
+    addr = shmat(shmid, NULL, 0);
+
+    return addr;
 }
 
 int getResultadoFinal() {
