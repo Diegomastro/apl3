@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <semaphore.h>
 #include <unistd.h>
+#include <signal.h>
 #define MAX_PALABRA 8
 
 const char PALABRA_INICIAL[MAX_PALABRA] = "*******";
@@ -23,8 +24,9 @@ void mostrarEstado(char*, int[],int);
 int* getMemoriaPuntajeGanado();
 int todosGanan(char* jugadores[], int numJugadores);
 void darResultadoJugador(int* ganador, sem_t* sem_resultado);
-
+void registrarSeniales();
 int main() {
+    registrarSeniales();
     int puntajes[] = {0,0,0};
     char *sem_cantJugadores_name = "cantJugadores";
     char *sem_partidaTerminada_name = "partidaTerminada";
@@ -117,6 +119,21 @@ int main() {
 
     finalPartida(puntajes, numJugadores, sem_resultado);
     return 0;
+}
+
+void signal_sigint(int signum) {
+    return;
+}
+
+void signal_sigterm(int signum) {
+    system("clear");
+    puts("Usted decidio finalizar el programa, saludos!");
+    exit(0);
+}
+
+void registrarSeniales() {
+    signal(SIGINT, signal_sigint);
+    signal(SIGTERM, signal_sigterm);
 }
 
 int todosGanan(char* jugadores[], int numJugadores) {
