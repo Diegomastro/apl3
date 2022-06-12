@@ -146,7 +146,7 @@ void leerPalabra(char* buffer) {
     int shmid = 0;
     char* addr = NULL;
     key_t key = ftok("./palabraDeJuego", 'X');
-    shmid = shmget(key, len, IPC_CREAT);
+    shmid = shmget(key, len, 0666|IPC_CREAT);
     addr = shmat(shmid, NULL, 0);
 
     memcpy(addr, buffer, len);
@@ -188,7 +188,7 @@ int* getMemoriaPuntajeGanado() {
     int shmid = 0;
     int* addr = NULL;
     key_t key = ftok("./puntajes", 'B');
-    shmid = shmget(key, len, IPC_CREAT);
+    shmid = shmget(key, len, 0666|IPC_CREAT);
     addr = shmat(shmid, NULL, 0);
 
     return addr;
@@ -208,7 +208,7 @@ char* crearMemoriaJugadores() {
     int shmid = 0;
     char* addr = NULL;
     key_t key = ftok("./vidas_jugadores", 'B');
-    shmid = shmget(key, len, IPC_CREAT);
+    shmid = shmget(key, len, 0666|IPC_CREAT);
     addr = shmat(shmid, NULL, 0);
 
     char vidasIniciales[] = {6 ,6 ,6};
@@ -221,7 +221,7 @@ char* crearMemoriaJugador(char* path, char id) {
     int shmid = 0;
     char* addr = NULL;
     key_t key = ftok(path, id);
-    shmid = shmget(key, len, IPC_CREAT);
+    shmid = shmget(key, len, 0666|IPC_CREAT);
     addr = shmat(shmid, NULL, 0);
     memcpy(addr, PALABRA_INICIAL, len);
     return addr;
@@ -247,7 +247,7 @@ void darResultadoJugador(int* ganador, sem_t* sem_resultado) {
     int shmid = 0;
     char* addr = NULL;
     key_t key = ftok("./resultado", 'X');
-    shmid = shmget(key, len, IPC_CREAT);
+    shmid = shmget(key, len, 0666|IPC_CREAT);
     addr = shmat(shmid, NULL, 0);
     memcpy(addr, ganador, sizeof(int));
 

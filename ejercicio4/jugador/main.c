@@ -49,7 +49,7 @@ int main() {
     int shmid = 0;
     char* palabraJugadorX = NULL;
     key_t key = ftok(pathAMemoria, 'X');
-    shmid = shmget(key, len, IPC_CREAT);
+    shmid = shmget(key, len, 0666|IPC_CREAT);
     palabraJugadorX = shmat(shmid, NULL, 0);
 
     char* palabraDeJuego = getPalabraDeJuego();
@@ -148,7 +148,7 @@ char* getPalabraDeJuego() {
     int shmid = 0;
     char* addr = NULL;
     key_t key = ftok("./palabraDeJuego", 'X');
-    shmid = shmget(key, len, IPC_CREAT);
+    shmid = shmget(key, len, 0666|IPC_CREAT);
     addr = shmat(shmid, NULL, 0);
 
     return addr;
@@ -160,7 +160,7 @@ int getResultadoFinal() {
     int shmid = 0;
     char* addr = NULL;
     key_t key = ftok("./resultado", 'X');
-    shmid = shmget(key, len, IPC_CREAT);
+    shmid = shmget(key, len, 0666|IPC_CREAT);
     addr = shmat(shmid, NULL, 0);
     memcpy(&res, addr, len);
 
@@ -185,15 +185,14 @@ void escribirPuntaje(int* puntaje) {
     int shmid = 0;
     int* addr = NULL;
     key_t key = ftok("./puntajes", 'B');
-    shmid = shmget(key, len, IPC_CREAT);
+    shmid = shmget(key, len, 0666|IPC_CREAT);
     addr = shmat(shmid, NULL, 0);
 
     memcpy(addr, puntaje, sizeof(int));
 }
 
 int adivinoPalabra(char* palabraX) {
-    for (int i = 0; i < MAX_PALABRA; ++i)
-    {
+    for (int i = 0; i < MAX_PALABRA; ++i) {
         if (palabraX[i] == '*') {
             return 0;
         }
