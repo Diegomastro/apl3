@@ -133,7 +133,6 @@ void leerPalabra(char* buffer) {
     int random = rand();
     int indiceRandom = random % CANT_PALABRAS;
     int indice = 0;
-    printf("random = %d, indiceRandom = %d\n", random, indiceRandom);
     textfile = fopen("palabras.txt", "r");
 
     for (int i = 0; i <= indiceRandom; ++i) {
@@ -159,8 +158,6 @@ void leerPalabra(char* buffer) {
     addr = shmat(shmid, NULL, 0);
 
     memcpy(addr, buffer, len);
-    puts("Buffer:");
-    puts(buffer);
 }
 
 void signal_sigint(int signum) {
