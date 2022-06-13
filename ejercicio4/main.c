@@ -161,10 +161,7 @@ void leerPalabra(char* buffer) {
 }
 
 void signal_sigint(int signum) {
-    system("clear");
-    puts("Usted decidio finalizar el programa, saludos!");
-    fflush(stdout);
-    exit(0);
+    return;
 }
 
 

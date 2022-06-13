@@ -9,6 +9,21 @@
 #define ACIERTO 2
 #define FALLO -1
 
+//TODO 
+/*
+pasar por parametro lo necesario pa la conexion
+server: puerto
+cliente: ip + puerto
+
+archivo palabras
+seniales
+
+help en los 2
+
+mostrarr la palabra que era
+*/
+
+
 
 void mostrarEstados(int puntajes[], int cantJugadores);
 int procesarTurno(int idJugador, int socketId, char* palabraActual, char* palabraDeJuego);
@@ -16,8 +31,9 @@ int yaGano(char* cadena);
 int getMaxIndex(int puntajes[], int cantJugadores);
 
 int main(int argc, char const* argv[]) {
-
-    char* hello = "Hello from server";
+    const int uno = 1;
+    const int cero = 0;
+    int yaLeMandamosQueGano[] = {0,0,0};
     int cantJugadores;
     int socketsJugadores[MAX_JUGADORES] = {0};
     int vidasJugadores[] = {6, 6, 6};
@@ -66,15 +82,28 @@ int main(int argc, char const* argv[]) {
     int cantTerminados = 0;
     int turno = 0;
     while (cantTerminados != cantJugadores) {
-        if (vidasJugadores[turno] <= 0 || yaGano(palabrasJugadores[turno])) {
+        if (vidasJugadores[turno] <= 0) {
+            ++turno;
+            turno %= cantJugadores;
             continue;
         }
+        
+        if (yaGano(palabrasJugadores[turno])) {
+            if(!yaLeMandamosQueGano[turno]) {
+                cantTerminados++;
+                yaLeMandamosQueGano[turno] = 1;
+                send(socketsJugadores[turno], &uno, sizeof(int), 0);
+            }
+            ++turno;
+            turno %= cantJugadores;
+            continue;
+        } else {
+            send(socketsJugadores[turno], &cero, sizeof(int), 0);   
+        }
+        
         printf("Turno jugador %d\n", turno+1);
         
         int resultado = procesarTurno(turno+1, socketsJugadores[turno], palabrasJugadores[turno], palabraDeJuego);        
-        printf("res %d\n", resultado);
-        puts("paso prot");
-        fflush(stdout);
         puntajes[turno] += resultado;
         if (resultado == FALLO) {
             --vidasJugadores[turno];
@@ -90,6 +119,7 @@ int main(int argc, char const* argv[]) {
     }
     system("clear");
     puts("Termino la partida!");
+    fflush(stdout);
 
     char stringGanador[] = "Felicidades jugador *! sos el ganador";
     char stringPerdedor[] = "Lo lamento jugador * el ganador fue el jugador *";
@@ -97,12 +127,12 @@ int main(int argc, char const* argv[]) {
 
     for (int i = 0; i < cantJugadores; ++i) {
         if (i == maxIndex) {
-            stringGanador[20] = i+1;
+            stringGanador[20] = i+1 + '0';
             send(socketsJugadores[i], stringGanador, strlen(stringGanador)+1, 0);
             continue;
         }
-        stringPerdedor[19] = (i+1) + '0';
-        stringPerdedor[47] = (maxIndex+1) + '0';
+        stringPerdedor[19] = '0' + (i+1);
+        stringPerdedor[47] = '0' + (maxIndex+1);
         send(socketsJugadores[i], stringPerdedor, strlen(stringPerdedor)+1, 0);
     }
 
@@ -153,16 +183,13 @@ int procesarTurno(int idJugador, int socketId, char* palabraActual, char* palabr
     while ((actual = *palabraDeJuego)) {
 
         if (actual == intento && *(palabraActual+index) == '*') {
-            puts("entra al acierto");
            acerto = 1;
            *(palabraActual+index) = intento;
         }
        ++index;
        ++palabraDeJuego;
     }
-    puts("salio while");
-    fflush(stdout);
-    send(socketId, &acerto, sizeof(int), 0);
+    send(socketId, &acerto, sizeof(int), 0); 
 
     return acerto ? ACIERTO : FALLO;
 }

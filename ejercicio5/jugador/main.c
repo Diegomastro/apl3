@@ -12,7 +12,7 @@ int yaGano(char* cadena);
 int murio(int vidas);
 
 int main(int argc, char const* argv[]) {
-    int partidaTerminada = 0;
+    int yagano = 0;
     int server = 0, valread, client;
     struct sockaddr_in serv_addr;
     int resultadoTurno;
@@ -56,10 +56,14 @@ int main(int argc, char const* argv[]) {
 
     while(!murio(vidas)) {
         system("clear");
-        read(server, buffer, BUFFER_LEN);
-        if (yaGano(buffer)) {
+
+        read(server, &yagano, sizeof(int));
+        if (yagano) {
             break;
         }
+
+        read(server, buffer, BUFFER_LEN);
+
         puts("Es tu turno! tu palabra es:");
         puts("ingrese un caracter");
         puts(buffer);
@@ -81,6 +85,7 @@ int main(int argc, char const* argv[]) {
         }
     }
 
+    puts("esperando");
     read(server, buffer, BUFFER_LEN);
     puts(buffer);
     
