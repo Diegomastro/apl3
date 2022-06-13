@@ -1,5 +1,7 @@
 #include <arpa/inet.h>
+#include <netinet/in.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -15,7 +17,18 @@ int main(int argc, char const* argv[]) {
         printf("\n Socket creation error \n");
         return -1;
     }
- 
+    
+    struct timeval t;
+    t.tv_sec = 0;
+    t.tv_usec = 0;
+    setsockopt(
+      sock,     // Socket descriptor
+      SOL_SOCKET, // To manipulate options at the sockets API level
+      SO_RCVTIMEO,// Specify the receiving or sending timeouts 
+      (const void *)(&t), // option values
+      sizeof(t) 
+    );
+
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(PORT);
 
@@ -25,7 +38,8 @@ int main(int argc, char const* argv[]) {
             "\nInvalid address/ Address not supported \n");
         return -1;
     }
- 
+    
+    bind(sock, &serv_addr, sizeof(serv_addr));
     if ((client
          = connect(sock, (struct sockaddr*)&serv_addr,
                    sizeof(serv_addr)))
@@ -34,10 +48,13 @@ int main(int argc, char const* argv[]) {
         return -1;
     }
 
-
-    printf("reding\n");
-    valread = read(sock, buffer, 1024);
+    while (1) {
+    printf("reading\n");
+    valread = read(sock, buffer, strlen("Hello from server"));
     printf("%s\n", buffer);
+    printf("%d\n", valread);
+
+    }
  
     // closing the connected socket
     close(client);
