@@ -59,15 +59,6 @@ int main(int argc, char const* argv[]) {
         printf("clietne %d\n", cliente);
     }
 
- 
-    for (int i = 0; i < jugadoresConectados; ++i)
-    {
-        int val = send(socketsJugadores[i], hello, strlen(hello), 0);
-        printf("%d\n", val);
-        fflush(stdout);
-    }
-
-
     char* palabraDeJuego = "palabra"; // copiar del ejercio 4
     // while de partida
     int cantTerminados = 0;
@@ -95,12 +86,13 @@ int main(int argc, char const* argv[]) {
     system("clear");
     puts("Termino la partida!");
 
-    char stringGanador[] = "Felicidades! sos el ganador";
+    char stringGanador[] = "Felicidades jugador *! sos el ganador";
     char stringPerdedor[] = "Lo lamento jugador * el ganador fue el jugador *";
     int maxIndex = getMaxIndex(puntajes, cantJugadores);
 
     for (int i = 0; i < cantJugadores; ++i) {
         if (i == maxIndex) {
+            stringGanador[20] = i+1;
             send(socketsJugadores[i], stringGanador, strlen(stringGanador)+1, 0);
             continue;
         }
