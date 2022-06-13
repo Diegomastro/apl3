@@ -39,7 +39,7 @@ int main(int argc, char const* argv[]) {
         return -1;
     }
     
-    bind(sock, &serv_addr, sizeof(serv_addr));
+    bind(sock, (const  struct sockaddr *) &serv_addr, sizeof(serv_addr));
     if ((client
          = connect(sock, (struct sockaddr*)&serv_addr,
                    sizeof(serv_addr)))
@@ -48,13 +48,11 @@ int main(int argc, char const* argv[]) {
         return -1;
     }
 
-    while (1) {
-    printf("reading\n");
+
     valread = read(sock, buffer, strlen("Hello from server"));
     printf("%s\n", buffer);
     printf("%d\n", valread);
 
-    }
  
     // closing the connected socket
     close(client);

@@ -11,8 +11,10 @@
 
 
 void mostrarEstados(int puntajes[], int cantJugadores);
+int procesarTurno(int idJugador, int socketId, char* palabraActual, char* palabraDeJuego);
 
 int main(int argc, char const* argv[]) {
+
     char* hello = "Hello from server";
     int cantJugadores;
     int socketsJugadores[MAX_JUGADORES] = {0};
@@ -32,7 +34,7 @@ int main(int argc, char const* argv[]) {
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(PORT);
-
+    socklen_t len = sizeof(address);
     struct timeval t;
     t.tv_sec = 0;
     t.tv_usec = 0;
@@ -44,7 +46,7 @@ int main(int argc, char const* argv[]) {
       sizeof(t) 
     );
 
-    bind(server, &address, sizeof(address));
+    bind(server, (const struct sockaddr *) &address, (socklen_t) sizeof(address));
     listen(server, cantJugadores);
 
     int jugadoresConectados = 0;
@@ -52,7 +54,7 @@ int main(int argc, char const* argv[]) {
     // jugadores conectados == ingresados por teclado
     while (jugadoresConectados != cantJugadores) {
         printf("Jugadores conectados = %d\n", jugadoresConectados);
-        int cliente = accept(server, &address, sizeof(address));
+        int cliente = accept(server, &address, &len);
         if (cliente < 0) {
             continue;
         }
@@ -69,7 +71,7 @@ int main(int argc, char const* argv[]) {
     }
 
 
-    const char* palabraDeJuego = "palabra"; // copiar del ejercio 4
+    char* palabraDeJuego = "palabra"; // copiar del ejercio 4
     // while de partida
     int cantTerminados = 0;
     int turno = 0;
