@@ -6,14 +6,17 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #define PORT 8080
+#define BUFFER_LEN 20
 
 int main(int argc, char const* argv[]) {
-    int sock = 0, valread, client;
+    int partidaTerminada = 0;
+    int server = 0, valread, client;
     struct sockaddr_in serv_addr;
-    char* hello = "Hello from client";
-    char buffer[1024] = { 0 };
+    int resultadoTurno;
+    char buffer[BUFFER_LEN] = { 0 };
+    int vidas = 6;
 
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+    if ((server = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         printf("\n Socket creation error \n");
         return -1;
     }
@@ -22,7 +25,7 @@ int main(int argc, char const* argv[]) {
     t.tv_sec = 0;
     t.tv_usec = 0;
     setsockopt(
-      sock,     // Socket descriptor
+      server,     // Socket descriptor
       SOL_SOCKET, // To manipulate options at the sockets API level
       SO_RCVTIMEO,// Specify the receiving or sending timeouts 
       (const void *)(&t), // option values
@@ -39,22 +42,58 @@ int main(int argc, char const* argv[]) {
         return -1;
     }
     
-    bind(sock, (const  struct sockaddr *) &serv_addr, sizeof(serv_addr));
+    bind(server, (const  struct sockaddr *) &serv_addr, sizeof(serv_addr));
     if ((client
-         = connect(sock, (struct sockaddr*)&serv_addr,
+         = connect(server, (struct sockaddr*)&serv_addr,
                    sizeof(serv_addr)))
         < 0) {
         printf("\nConnection Failed \n");
         return -1;
     }
 
+    while(!partidaTerminada) {
+        system("clear");
+        read(server, buffer, BUFFER_LEN);
+        puts("Es tu turno! tu palabra es:");
+        puts("ingrese un caracter");
+        puts(buffer);
+        fflush(stdout);
+        char intento;
+        scanf(" %c", &intento);
+        getchar();
+        send(server, intento, sizeof(char), 0);
 
-    valread = read(sock, buffer, strlen("Hello from server"));
-    printf("%s\n", buffer);
-    printf("%d\n", valread);
+        read(server, &resultadoTurno, sizeof(int));
+        if (resultadoTurno == 0) { //if fallo
+            vidas--;
+            puts("Error: la letra no se encuentra en la palabra");
+            fflush(stdout);
+        } else { // if acierto
+            puts("correcto! tu letra figura en la palabra");
+            fflush(stdout);
+        }
+    }
 
- 
-    // closing the connected socket
+    read(server, buffer, BUFFER_LEN);
+    puts(buffer);
+    
+
+
     close(client);
     return 0;
+}
+
+
+int murio(int vidas) {
+    return (vidas <= 0);
+}
+
+int adivinoPalabra(char* palabra) {
+    while (*palabra) {
+        if (*palabra == '*') {
+            return 0;
+        }
+    }
+
+    return 1;
 }
