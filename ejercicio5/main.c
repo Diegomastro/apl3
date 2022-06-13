@@ -12,6 +12,8 @@
 
 void mostrarEstados(int puntajes[], int cantJugadores);
 int procesarTurno(int idJugador, int socketId, char* palabraActual, char* palabraDeJuego);
+int yaGano(char* cadena);
+int getMaxIndex(int puntajes[], int cantJugadores);
 
 int main(int argc, char const* argv[]) {
 
@@ -19,7 +21,7 @@ int main(int argc, char const* argv[]) {
     int cantJugadores;
     int socketsJugadores[MAX_JUGADORES] = {0};
     int vidasJugadores[] = {6, 6, 6};
-    char* palabrasJugadores[] = {
+    char palabrasJugadores[][8] = {
         "*******",
         "*******",
         "*******"
@@ -70,6 +72,9 @@ int main(int argc, char const* argv[]) {
         printf("Turno jugador %d\n", turno+1);
         
         int resultado = procesarTurno(turno+1, socketsJugadores[turno], palabrasJugadores[turno], palabraDeJuego);        
+        printf("res %d\n", resultado);
+        puts("paso prot");
+        fflush(stdout);
         puntajes[turno] += resultado;
         if (resultado == FALLO) {
             --vidasJugadores[turno];
@@ -140,18 +145,23 @@ int procesarTurno(int idJugador, int socketId, char* palabraActual, char* palabr
     char intento;
 
     read(socketId, &intento, 1); 
-
     int index = 0;
     char actual;
     int primera = 1;
     int acerto = 0;
-    while ((actual = *palabraDeJuego)) {
-       if (actual == intento && palabraActual[index] == '*') {
-           acerto = 1;
-           palabraActual[index] = intento;
-       }
-    }
 
+    while ((actual = *palabraDeJuego)) {
+
+        if (actual == intento && *(palabraActual+index) == '*') {
+            puts("entra al acierto");
+           acerto = 1;
+           *(palabraActual+index) = intento;
+        }
+       ++index;
+       ++palabraDeJuego;
+    }
+    puts("salio while");
+    fflush(stdout);
     send(socketId, &acerto, sizeof(int), 0);
 
     return acerto ? ACIERTO : FALLO;

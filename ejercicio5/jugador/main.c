@@ -6,7 +6,10 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #define PORT 8080
-#define BUFFER_LEN 20
+#define BUFFER_LEN 1024
+
+int yaGano(char* cadena);
+int murio(int vidas);
 
 int main(int argc, char const* argv[]) {
     int partidaTerminada = 0;
@@ -15,7 +18,7 @@ int main(int argc, char const* argv[]) {
     int resultadoTurno;
     char buffer[BUFFER_LEN] = { 0 };
     int vidas = 6;
-
+    int val;
     if ((server = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         printf("\n Socket creation error \n");
         return -1;
@@ -51,9 +54,12 @@ int main(int argc, char const* argv[]) {
         return -1;
     }
 
-    while(!partidaTerminada) {
+    while(!murio(vidas)) {
         system("clear");
         read(server, buffer, BUFFER_LEN);
+        if (yaGano(buffer)) {
+            break;
+        }
         puts("Es tu turno! tu palabra es:");
         puts("ingrese un caracter");
         puts(buffer);
@@ -61,7 +67,8 @@ int main(int argc, char const* argv[]) {
         char intento;
         scanf(" %c", &intento);
         getchar();
-        send(server, intento, sizeof(char), 0);
+        val = send(server, &intento, sizeof(char), 0);
+        printf("%d\n", val);
 
         read(server, &resultadoTurno, sizeof(int));
         if (resultadoTurno == 0) { //if fallo
@@ -88,11 +95,13 @@ int murio(int vidas) {
     return (vidas <= 0);
 }
 
-int adivinoPalabra(char* palabra) {
-    while (*palabra) {
-        if (*palabra == '*') {
+
+int yaGano(char* cadena) {
+    while (*cadena) {
+        if (*cadena == '*') {
             return 0;
         }
+        ++cadena;
     }
 
     return 1;
