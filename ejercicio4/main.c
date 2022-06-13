@@ -10,7 +10,7 @@
 #include <signal.h>
 #include <time.h>
 #define MAX_PALABRA 8
-#define CANT_PALABRAS 15
+#define CANT_PALABRAS 14
 
 const char PALABRA_INICIAL[MAX_PALABRA] = "*******";
 
@@ -120,6 +120,7 @@ int main() {
 
     sem_post(sem_partidaTerminada); // CREO que no lo estoy usando, por las dudas igual queda
     for (int i = 0; i < 3; ++i) {
+        puts("subiendo");
         sem_post(sem_turnos[i]);
     }
 
@@ -153,8 +154,12 @@ void leerPalabra(char* buffer) {
 }
 
 void signal_sigint(int signum) {
-    return;
+    system("clear");
+    puts("Usted decidio finalizar el programa, saludos!");
+    fflush(stdout);
+    exit(0);
 }
+
 
 void signal_sigterm(int signum) {
     system("clear");
@@ -230,7 +235,7 @@ char* crearMemoriaJugador(char* path, char id) {
 void finalPartida(int puntajes[], int size, sem_t* sem_resultado) {
     // MARQUITO completame esto
     // ademas de printearlo, que cree una string con esto y se lo mande a cada jugador por memoria compartida
-    system("clear");
+    //system("clear");
     for (int i = 0; i < size; ++i) {
         printf("Jugador %d: %d Pts.", i+1, puntajes[i]);
     }

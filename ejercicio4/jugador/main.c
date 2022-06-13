@@ -59,7 +59,6 @@ int main() {
     int jugadoresTerminados;
 
     puts("entro");
-    printf("partida terminada: %d", partidaTerminada);
     while (!partidaTerminada) {
         sem_wait(sem_turno);
 
@@ -68,6 +67,7 @@ int main() {
             if (partidaTerminada) {
                 break;
             }
+            system("clear");
             puts("Es tu turno! tu palabra es:");
             puts(palabraJugadorX);
             puts("ingrese un caracter");
@@ -103,7 +103,7 @@ int main() {
             if (murio(vidas)) {
                 puntajeRonda = 0;
                 escribirPuntaje(&puntajeRonda);
-                puts("Aurcado! Esperando a que los demas jugadores terminen");
+                puts("Ahorcado! Esperando a que los demas jugadores terminen");
                 fflush(stdout);
             } else {
                 escribirPuntaje(&puntajeRonda);    
@@ -124,7 +124,9 @@ int main() {
             // si ya terminaron todos, salir del loop.
             sem_getvalue(sem_cantJugadores, &cantJugadores);
             sem_getvalue(sem_jugadoresTerminados, &jugadoresTerminados);
+
             if (cantJugadores == jugadoresTerminados) {  // asqueroso esto eh
+
                 sem_post(sem_letraMandada);
                 break; 
             }
@@ -177,7 +179,7 @@ void finalPartida(int resultado, int id) {
         return;
     }
     system("clear");
-    printf("Felicidades jugador %d, eres el gandor!", id);
+    printf("Felicidades jugador %d, eres el ganador!", id);
 }
 
 void escribirPuntaje(int* puntaje) {
