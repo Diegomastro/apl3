@@ -55,31 +55,20 @@ int main(int argc, char const* argv[]) {
     while (jugadoresConectados != cantJugadores) {
         printf("Jugadores conectados = %d\n", jugadoresConectados);
         int cliente = accept(server, &address, &len);
-        if (cliente < 0) {
-            continue;
-        }
         socketsJugadores[jugadoresConectados++] = cliente;
         printf("clietne %d\n", cliente);
     }
-
- 
-    for (int i = 0; i < jugadoresConectados; ++i)
-    {
-        int val = send(socketsJugadores[i], hello, strlen(hello), 0);
-        printf("%d\n", val);
-        fflush(stdout);
-    }
-
 
     char* palabraDeJuego = "palabra"; // copiar del ejercio 4
     // while de partida
     int cantTerminados = 0;
     int turno = 0;
     while (cantTerminados != cantJugadores) {
-        printf("Turno jugador %d\n", turno+1);
-        if (vidasJugadores[turno] <= 0) {
+        if (vidasJugadores[turno] <= 0 || yaGano(palabrasJugadores[turno])) {
             continue;
         }
+        printf("Turno jugador %d\n", turno+1);
+        
         int resultado = procesarTurno(turno+1, socketsJugadores[turno], palabrasJugadores[turno], palabraDeJuego);        
         puntajes[turno] += resultado;
         if (resultado == FALLO) {
@@ -94,9 +83,49 @@ int main(int argc, char const* argv[]) {
         turno %= cantJugadores;
         mostrarEstados(puntajes, cantJugadores);
     }
-
+    system("clear");
     puts("Termino la partida!");
+
+    char stringGanador[] = "Felicidades jugador *! sos el ganador";
+    char stringPerdedor[] = "Lo lamento jugador * el ganador fue el jugador *";
+    int maxIndex = getMaxIndex(puntajes, cantJugadores);
+
+    for (int i = 0; i < cantJugadores; ++i) {
+        if (i == maxIndex) {
+            stringGanador[20] = i+1;
+            send(socketsJugadores[i], stringGanador, strlen(stringGanador)+1, 0);
+            continue;
+        }
+        stringPerdedor[19] = (i+1) + '0';
+        stringPerdedor[47] = (maxIndex+1) + '0';
+        send(socketsJugadores[i], stringPerdedor, strlen(stringPerdedor)+1, 0);
+    }
+
     return 0;
+}
+
+int yaGano(char* cadena) {
+    while (*cadena) {
+        if (*cadena == '*') {
+            return 0;
+        }
+        ++cadena;
+    }
+
+    return 1;
+}
+
+int getMaxIndex(int puntajes[], int cantJugadores) {
+    int maxPuntaje = -9999;
+    int maxIndex = -1;
+    for (int i = 0; i < cantJugadores; ++i) {
+        if (puntajes[i] > maxPuntaje) {
+            maxPuntaje = puntajes[i];
+            maxIndex = i;
+        }
+    }
+
+    return maxIndex;
 }
 
 void mostrarEstados(int puntajes[], int cantJugadores) {
