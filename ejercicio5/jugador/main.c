@@ -5,13 +5,31 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#define PORT 8080
 #define BUFFER_LEN 1024
+#define CANT_PARAMS 3
+#define INDICE_PUERTO 1
+#define INDICE_IP 2
 
 int yaGano(char* cadena);
 int murio(int vidas);
+void getIp(char* buffer, char const* ip);
+int checkHelp(int argc, char const* argv[]);
 
 int main(int argc, char const* argv[]) {
+    const char* LOCALHOST = "127.0.0.1"; 
+    if (argc < CANT_PARAMS) {
+        return checkHelp(argc, argv);
+    }
+    unsigned int puerto = atoi(argv[INDICE_PUERTO]);
+    printf("Puero : %d\n", puerto);
+    const char* ip = argv[INDICE_IP];
+    const char* aux = ip;
+
+    if (strcmp(ip, "localhost") == 0) {
+        ip = LOCALHOST;
+    }
+
+    printf("IP: %s\n", ip);
     int yagano = 0;
     int server = 0, valread, client;
     struct sockaddr_in serv_addr;
@@ -36,9 +54,8 @@ int main(int argc, char const* argv[]) {
     );
 
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(PORT);
-
-    if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)
+    serv_addr.sin_port = htons(puerto);
+    if (inet_pton(AF_INET, ip, &serv_addr.sin_addr)
         <= 0) {
         printf(
             "\nInvalid address/ Address not supported \n");
@@ -95,6 +112,9 @@ int main(int argc, char const* argv[]) {
     return 0;
 }
 
+void getIp(char* buffer, char const* ip) {
+    memcpy(buffer, ip, strlen(ip));
+}
 
 int murio(int vidas) {
     return (vidas <= 0);
@@ -107,6 +127,20 @@ int yaGano(char* cadena) {
             return 0;
         }
         ++cadena;
+    }
+
+    return 1;
+}
+
+int checkHelp(int argc, char const* argv[]) {
+    for (int i = 0; i < argc; ++i) {
+        if (strcmp(argv[i], "--help") == 0) {
+            printf("Cliente del Ahorcado!\n");
+            printf("Sintaxis: %s PUERTO IP\n", argv[0]);
+            printf("PUERTO: puerto por el cual se conectara al servidor\n");
+            printf("IP: ip del host (puede indicar el string localhost si esta jugando local)\n");
+            return 0;
+        }
     }
 
     return 1;

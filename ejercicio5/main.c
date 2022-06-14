@@ -4,33 +4,31 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#define PORT 8080
+#include <signal.h>
+#include <time.h>
 #define MAX_JUGADORES 3
 #define ACIERTO 2
 #define FALLO -1
-
-//TODO 
-/*
-pasar por parametro lo necesario pa la conexion
-server: puerto
-cliente: ip + puerto
-
-archivo palabras
-seniales
-
-help en los 2
-
-mostrarr la palabra que era
-*/
-
-
+#define INDICE_PUERTO 1
+#define CANT_PARAMS 2
+#define CANT_PALABRAS 14
+#define MAX_PALABRA 8
 
 void mostrarEstados(int puntajes[], int cantJugadores);
 int procesarTurno(int idJugador, int socketId, char* palabraActual, char* palabraDeJuego);
 int yaGano(char* cadena);
 int getMaxIndex(int puntajes[], int cantJugadores);
+void leerPalabra(char* buffer);
+void signal_sigint(int signum);
+void signal_sigterm(int signum);
+void registrarSeniales();
+void checkHelp(int argc, char const* argv[]);
 
 int main(int argc, char const* argv[]) {
+    if (argc < CANT_PARAMS) return -1;
+    checkHelp(argc, argv);
+    registrarSeniales();
+    int puerto = atoi(argv[INDICE_PUERTO]);    
     const int uno = 1;
     const int cero = 0;
     int yaLeMandamosQueGano[] = {0,0,0};
@@ -44,6 +42,9 @@ int main(int argc, char const* argv[]) {
     };
     int puntajes[MAX_JUGADORES] = {0};
 
+    char palabraDeJuego[MAX_PALABRA];
+    leerPalabra(palabraDeJuego);
+    puts(palabraDeJuego);
     puts("Ingrese la cantidad de jugadores:");
     scanf("%d", &cantJugadores);
 
@@ -51,7 +52,7 @@ int main(int argc, char const* argv[]) {
     struct sockaddr_in address;
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons(PORT);
+    address.sin_port = htons(puerto);
     socklen_t len = sizeof(address);
     struct timeval t;
     t.tv_sec = 0;
@@ -77,7 +78,6 @@ int main(int argc, char const* argv[]) {
         printf("clietne %d\n", cliente);
     }
 
-    char* palabraDeJuego = "palabra"; // copiar del ejercio 4
     // while de partida
     int cantTerminados = 0;
     int turno = 0;
@@ -135,6 +135,8 @@ int main(int argc, char const* argv[]) {
         stringPerdedor[47] = '0' + (maxIndex+1);
         send(socketsJugadores[i], stringPerdedor, strlen(stringPerdedor)+1, 0);
     }
+
+    printf("Fin de la partida! la palabra a adivinar era: %s\n", palabraDeJuego);
 
     return 0;
 }
@@ -194,9 +196,52 @@ int procesarTurno(int idJugador, int socketId, char* palabraActual, char* palabr
     return acerto ? ACIERTO : FALLO;
 }
 
+void leerPalabra(char* buffer) {
+    FILE* textfile;
+    srand(time(NULL));
+    int random = rand();
+    int indiceRandom = random % CANT_PALABRAS;
+    int indice = 0;
+    textfile = fopen("palabras.txt", "r");
 
+    for (int i = 0; i <= indiceRandom; ++i) {
+        fgets(buffer, MAX_PALABRA + 1, textfile);
+    }
 
+    char* tmp = buffer;
 
+    while (*tmp) {
+        if (*tmp == '\n') {
+            *tmp = '\0';
+        }
+        ++tmp;
+    }
 
+    fclose(textfile);
+}
 
+void signal_sigint(int signum) {
+    return;
+}
 
+void signal_sigterm(int signum) {
+    system("clear");
+    puts("Usted decidio finalizar el programa, saludos!");
+    exit(0);
+}
+
+void registrarSeniales() {
+    signal(SIGINT, signal_sigint);
+    signal(SIGTERM, signal_sigterm);
+}
+
+void checkHelp(int argc, char const* argv[]) {
+    for (int i = 0; i < argc; ++i) {
+        if (strcmp(argv[i], "--help")) {
+            printf("Servidor del Ahorcado!\n");
+            printf("Sintaxis: %s <PUERTO>\n", argv[0]);
+            printf("PUERTO: puerto donde se conectaran los clientes con este servidor\n");
+            exit(0);
+        }
+    }
+}
