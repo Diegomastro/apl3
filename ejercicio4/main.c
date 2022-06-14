@@ -184,6 +184,28 @@ void signal_sigint(int signum) {
 void signal_sigterm(int signum) {
     system("clear");
     puts("Usted decidio finalizar el programa, saludos!");
+    // limpiamos la memoria
+
+    // cerrar semaforos
+    char *sem_cantJugadores_name = "cantJugadores";
+    char *sem_partidaTerminada_name = "partidaTerminada";
+    char *sem_turno1_name = "turno1";
+    char *sem_turno2_name = "turno2";
+    char *sem_turno3_name = "turno3";
+    char *sem_letraMandada_name = "letraMandada";
+    char *sem_names[] = {sem_turno1_name, sem_turno2_name, sem_turno3_name};
+    char *sem_jugadoresTerminados_name = "JugadoresTerminados";
+    char* sem_resultado_name = "resultadoPartida";
+    
+    sem_unlink(sem_cantJugadores_name);
+    sem_unlink(sem_turno1_name);
+    sem_unlink(sem_turno2_name);
+    sem_unlink(sem_turno3_name);
+    sem_unlink(sem_partidaTerminada_name);
+    sem_unlink(sem_letraMandada_name);
+    sem_unlink(sem_jugadoresTerminados_name);
+    sem_unlink(sem_resultado_name);
+
     exit(0);
 }
 

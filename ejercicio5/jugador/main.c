@@ -12,7 +12,6 @@
 
 int yaGano(char* cadena);
 int murio(int vidas);
-void getIp(char* buffer, char const* ip);
 int checkHelp(int argc, char const* argv[]);
 
 int main(int argc, char const* argv[]) {
@@ -110,10 +109,6 @@ int main(int argc, char const* argv[]) {
 
     close(client);
     return 0;
-}
-
-void getIp(char* buffer, char const* ip) {
-    memcpy(buffer, ip, strlen(ip));
 }
 
 int murio(int vidas) {
