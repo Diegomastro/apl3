@@ -124,6 +124,8 @@ int main() {
     }
 
     finalPartida(puntajes, numJugadores, sem_resultado);
+
+    printf("Fin de la partida! la palabra a adivinar era: %s\n", palabra);
     return 0;
 }
 
