@@ -2,12 +2,23 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <string.h>
+#include <stdlib.h>
 
 void printStatus(int processNumber) {
     printf("Proceso %d - PID %d - Padre %d\n", processNumber, getpid(), getppid());
 }
 
 int main(int argc, char const* argv[]) {
+    if (argc > 1) {
+        for (int i = 0; i < argc; ++i) {
+            if (strcmp(argv[i], "--help") == 0) {
+                puts("Jerarquia de procesos realizado mediante el syscall fork");
+                printf("Sintaxis: %s\n", argv[0]);
+                exit(0);
+            }
+        }
+    }
     // somos el proceso 1
     pid_t firsProcessPid = getpid();
     printStatus(1);
