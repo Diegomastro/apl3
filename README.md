@@ -14,3 +14,13 @@ Ejercicio 5:
 Implementar el mismo juego del ahorcado, pero en red, estableciendo la comunicación vía sockets.
 Tanto el cliente como el servidor deben tomar por parámetro los datos necesarios para poder
 establecer la conexión.
+
+Ejercicio 1:
+Crear una jerarquía de procesos que replique el siguiente grafo:
+Al proceso 8 lo genera el proceso 4, no es un error del dibujo. Cada proceso deberá imprimir por
+pantalla:
+Proceso 1 - PID 3467 - Padre: 15
+Proceso 2 - PID 575 - Padre: 3467
+Proceso 3 - PID 4672 - Padre: 3467
+Generar una espera antes de finalizar los procesos para poder validar la correcta generación (10
+segundos), o bien el típico “Presione una tecla para continuar…”
