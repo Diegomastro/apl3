@@ -29,8 +29,12 @@ int todosGanan(char* jugadores[], int numJugadores);
 void darResultadoJugador(int* ganador, sem_t* sem_resultado);
 void registrarSeniales();
 void leerPalabra(char* buffer);
+void checkHelp(int argc, char const* argv[]);
 
-int main() {
+int main(int argc, char const* argv[]) {
+    if (argc > 1) {
+        checkHelp(argc, argv);
+    }
     registrarSeniales();
     int puntajes[] = {0,0,0};
     char *sem_cantJugadores_name = "cantJugadores";
@@ -127,6 +131,16 @@ int main() {
 
     printf("Fin de la partida! la palabra a adivinar era: %s\n", palabra);
     return 0;
+}
+
+void checkHelp(int argc, char const* argv[]) {
+    for (int i = 0; i < argc; ++i) {
+        if (strcmp(argv[i], "--help")) {
+            puts("Servidor del Ahorcado");
+            printf("Sintaxis: %s");
+            exit(0);
+        }
+    }
 }
 
 void leerPalabra(char* buffer) {

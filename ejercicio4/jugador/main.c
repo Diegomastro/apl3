@@ -15,8 +15,10 @@ void escribirPuntaje(int*);
 int adivinoPalabra(char* palabraX);
 int murio(int vidas);
 int getResultadoFinal();
+void checkHelp(int argc, char const* argv[]);
 
-int main() {
+int main(int argc, char const* argv[]) {
+    checkHelp(argc, argv);
     const char *sem_cantJugadores_name = "cantJugadores";
     const char *sem_letraMandada_name = "letraMandada";
     const char *sem_jugadoresTerminados_name = "JugadoresTerminados";
@@ -143,6 +145,16 @@ int main() {
     finalPartida(resultado, id);
     
     return 0;
+}
+
+void checkHelp(int argc, char const* argv[]) {
+    for (int i = 0; i < argc; ++i) {
+        if (strcmp(argv[i], "--help")) {
+            puts("Servidor del Ahorcado");
+            printf("Sintaxis: %s");
+            exit(0);
+        }
+    }
 }
 
 char* getPalabraDeJuego() {
