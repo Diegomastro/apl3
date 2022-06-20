@@ -30,6 +30,7 @@ void darResultadoJugador(int* ganador, sem_t* sem_resultado);
 void registrarSeniales();
 void leerPalabra(char* buffer);
 void checkHelp(int argc, char const* argv[]);
+void vaciarMemoria();
 
 int main(int argc, char const* argv[]) {
     if (argc > 1) {
@@ -99,7 +100,7 @@ int main(int argc, char const* argv[]) {
     } //esperamos por la cantidad de jugadores
     // PALABRA A ADIVINAR, despues habra que poner la logica para buscarlas de un archivo
 
-    //while (!todosPierden(vidasJugadores, numJugadores) && !todosGanan(jugadores, numJugadores)) {
+
     sem_getvalue(sem_jugadoresTerminados, &jugadoresTerminados);
     while (jugadoresTerminados != cantJugadores) {
         printf("Turno del jugador %d\n", turno+1);
@@ -123,7 +124,6 @@ int main(int argc, char const* argv[]) {
 
     sem_post(sem_partidaTerminada); // CREO que no lo estoy usando, por las dudas igual queda
     for (int i = 0; i < 3; ++i) {
-        puts("subiendo");
         sem_post(sem_turnos[i]);
     }
 
@@ -137,7 +137,7 @@ void checkHelp(int argc, char const* argv[]) {
     for (int i = 0; i < argc; ++i) {
         if (strcmp(argv[i], "--help")) {
             puts("Servidor del Ahorcado");
-            printf("Sintaxis: %s");
+            printf("Sintaxis: %s", argv[0]);
             exit(0);
         }
     }
@@ -177,6 +177,7 @@ void leerPalabra(char* buffer) {
 }
 
 void signal_sigint(int signum) {
+    //exit(0); // que molesto
     return;
 }
 
@@ -184,8 +185,7 @@ void signal_sigint(int signum) {
 void signal_sigterm(int signum) {
     system("clear");
     puts("Usted decidio finalizar el programa, saludos!");
-    // limpiamos la memoria
-
+    vaciarMemoria();
     // cerrar semaforos
     char *sem_cantJugadores_name = "cantJugadores";
     char *sem_partidaTerminada_name = "partidaTerminada";
@@ -284,9 +284,13 @@ void finalPartida(int puntajes[], int size, sem_t* sem_resultado) {
     puts("");
     int ganador = maxIndex(puntajes, size)+1;
 
-    printf("Ganador: jugador %d", ganador);
+    printf("Ganador: jugador %d\n", ganador);
 
     darResultadoJugador(&ganador, sem_resultado);
+}
+
+void vaciarMemoria() {
+    return;
 }
 
 void darResultadoJugador(int* ganador, sem_t* sem_resultado) {

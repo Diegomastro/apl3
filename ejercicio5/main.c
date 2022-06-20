@@ -22,10 +22,13 @@ void leerPalabra(char* buffer);
 void signal_sigint(int signum);
 void signal_sigterm(int signum);
 void registrarSeniales();
+void printHelpAndExit(char const* argv[]);
 void checkHelp(int argc, char const* argv[]);
 
 int main(int argc, char const* argv[]) {
-    if (argc < CANT_PARAMS) return -1;
+    if (argc < CANT_PARAMS) {
+        printHelpAndExit(argv);
+    }
     checkHelp(argc, argv);
     registrarSeniales();
     int puerto = atoi(argv[INDICE_PUERTO]);    
@@ -221,6 +224,7 @@ void leerPalabra(char* buffer) {
 }
 
 void signal_sigint(int signum) {
+    //exit(0); // que molesto
     return;
 }
 
@@ -235,13 +239,20 @@ void registrarSeniales() {
     signal(SIGTERM, signal_sigterm);
 }
 
+void printHelpAndExit(char const* argv[]) {
+    printf("Servidor del Ahorcado!\n");
+    printf("Sintaxis: %s <PUERTO>\n", argv[0]);
+    printf("PUERTO: puerto donde se conectaran los clientes con este servidor\n");
+    fflush(stdout);
+    exit(0);
+}
+
+
 void checkHelp(int argc, char const* argv[]) {
-    for (int i = 0; i < argc; ++i) {
-        if (strcmp(argv[i], "--help")) {
-            printf("Servidor del Ahorcado!\n");
-            printf("Sintaxis: %s <PUERTO>\n", argv[0]);
-            printf("PUERTO: puerto donde se conectaran los clientes con este servidor\n");
-            exit(0);
+    for (int i = 1; i < argc; ++i) {
+         if (strcmp(argv[i], "--help") == 0) {
+            printHelpAndExit(argv);
         }
     }
 }
+

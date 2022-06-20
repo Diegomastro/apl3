@@ -7,20 +7,21 @@
 #include <unistd.h>
 #define BUFFER_LEN 1024
 #define CANT_PARAMS 3
-#define INDICE_PUERTO 1
-#define INDICE_IP 2
+#define INDICE_PUERTO 2
+#define INDICE_IP 1
 
 int yaGano(char* cadena);
 int murio(int vidas);
-int checkHelp(int argc, char const* argv[]);
+void checkHelp(int argc, char const* argv[]);
+void printHelpAndExit(char const* argv[]);
 
 int main(int argc, char const* argv[]) {
     const char* LOCALHOST = "127.0.0.1"; 
     if (argc < CANT_PARAMS) {
-        return checkHelp(argc, argv);
+        checkHelp(argc, argv); //
+        printHelpAndExit(argv);
     }
     unsigned int puerto = atoi(argv[INDICE_PUERTO]);
-    printf("Puero : %d\n", puerto);
     const char* ip = argv[INDICE_IP];
     const char* aux = ip;
 
@@ -29,6 +30,8 @@ int main(int argc, char const* argv[]) {
     }
 
     printf("IP: %s\n", ip);
+    printf("Puerto : %d\n", puerto);
+
     int yagano = 0;
     int server = 0, valread, client;
     struct sockaddr_in serv_addr;
@@ -71,7 +74,6 @@ int main(int argc, char const* argv[]) {
     }
 
     while(!murio(vidas)) {
-        system("clear");
 
         read(server, &yagano, sizeof(int));
         if (yagano) {
@@ -79,6 +81,7 @@ int main(int argc, char const* argv[]) {
         }
 
         read(server, buffer, BUFFER_LEN);
+        system("clear");
 
         puts("Es tu turno! tu palabra es:");
         puts("ingrese un caracter");
@@ -127,16 +130,20 @@ int yaGano(char* cadena) {
     return 1;
 }
 
-int checkHelp(int argc, char const* argv[]) {
+void printHelpAndExit(char const* argv[]) {
+        printf("Cliente del Ahorcado!\n");
+        printf("Sintaxis: %s IP PUERTO\n", argv[0]);
+        printf("IP: ip del host (puede indicar el string localhost si esta jugando local)\n");
+        printf("PUERTO: puerto por el cual se conectara al servidor\n");
+        exit(1);
+}
+
+void checkHelp(int argc, char const* argv[]) {
     for (int i = 0; i < argc; ++i) {
         if (strcmp(argv[i], "--help") == 0) {
-            printf("Cliente del Ahorcado!\n");
-            printf("Sintaxis: %s PUERTO IP\n", argv[0]);
-            printf("PUERTO: puerto por el cual se conectara al servidor\n");
-            printf("IP: ip del host (puede indicar el string localhost si esta jugando local)\n");
-            return 0;
+            printHelpAndExit(argv);
         }
     }
 
-    return 1;
+    return;
 }

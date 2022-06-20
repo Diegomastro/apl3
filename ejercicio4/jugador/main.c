@@ -149,9 +149,9 @@ int main(int argc, char const* argv[]) {
 
 void checkHelp(int argc, char const* argv[]) {
     for (int i = 0; i < argc; ++i) {
-        if (strcmp(argv[i], "--help")) {
+        if (strcmp(argv[i], "--help") == 0) {
             puts("Servidor del Ahorcado");
-            printf("Sintaxis: %s");
+            printf("Sintaxis: %s", argv[0]);
             exit(0);
         }
     }
