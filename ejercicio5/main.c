@@ -34,23 +34,9 @@ int main(int argc, char const* argv[]) {
     int puerto = atoi(argv[INDICE_PUERTO]);    
     const int uno = 1;
     const int cero = 0;
-    int yaLeMandamosQueGano[] = {0,0,0};
     int cantJugadores;
-    int socketsJugadores[MAX_JUGADORES] = {0};
-    int vidasJugadores[] = {6, 6, 6};
-    char palabrasJugadores[][8] = {
-        "*******",
-        "*******",
-        "*******"
-    };
-    int puntajes[MAX_JUGADORES] = {0};
-
-    char palabraDeJuego[MAX_PALABRA];
-    leerPalabra(palabraDeJuego);
-    puts(palabraDeJuego);
     puts("Ingrese la cantidad de jugadores:");
     scanf("%d", &cantJugadores);
-
     int server = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in address;
     address.sin_family = AF_INET;
@@ -70,77 +56,93 @@ int main(int argc, char const* argv[]) {
 
     bind(server, (const struct sockaddr *) &address, (socklen_t) sizeof(address));
     listen(server, cantJugadores);
-
-    int jugadoresConectados = 0;
+    int jugadoresConectados;
     
-    // jugadores conectados == ingresados por teclado
-    while (jugadoresConectados != cantJugadores) {
-        printf("Jugadores conectados = %d\n", jugadoresConectados);
-        int cliente = accept(server, &address, &len);
-        socketsJugadores[jugadoresConectados++] = cliente;
-        printf("clietne %d\n", cliente);
-    }
+    while (1) {
+    int yaLeMandamosQueGano[] = {0,0,0};
+    int socketsJugadores[MAX_JUGADORES] = {0};
+    int vidasJugadores[] = {6, 6, 6};
+    char palabrasJugadores[][8] = {
+        "*******",
+        "*******",
+        "*******"
+    };
+    int puntajes[MAX_JUGADORES] = {0};
 
-    // while de partida
-    int cantTerminados = 0;
-    int turno = 0;
-    while (cantTerminados != cantJugadores) {
-        if (vidasJugadores[turno] <= 0) {
-            ++turno;
-            turno %= cantJugadores;
-            continue;
-        }
+    char palabraDeJuego[MAX_PALABRA];
+    leerPalabra(palabraDeJuego);
+    puts(palabraDeJuego);
+
+    
+        jugadoresConectados = 0;
         
-        if (yaGano(palabrasJugadores[turno])) {
-            if(!yaLeMandamosQueGano[turno]) {
-                cantTerminados++;
-                yaLeMandamosQueGano[turno] = 1;
-                send(socketsJugadores[turno], &uno, sizeof(int), 0);
+        // jugadores conectados == ingresados por teclado
+        while (jugadoresConectados != cantJugadores) {
+            printf("Jugadores conectados = %d\n", jugadoresConectados);
+            int cliente = accept(server, (struct sockaddr *) &address, &len);
+            socketsJugadores[jugadoresConectados++] = cliente;
+            printf("clietne %d\n", cliente);
+        }
+
+        // while de partida
+        int cantTerminados = 0;
+        int turno = 0;
+        while (cantTerminados != cantJugadores) {
+            if (vidasJugadores[turno] <= 0) {
+                ++turno;
+                turno %= cantJugadores;
+                continue;
             }
+            
+            if (yaGano(palabrasJugadores[turno])) {
+                if(!yaLeMandamosQueGano[turno]) {
+                    cantTerminados++;
+                    yaLeMandamosQueGano[turno] = 1;
+                    send(socketsJugadores[turno], &uno, sizeof(int), 0);
+                }
+                ++turno;
+                turno %= cantJugadores;
+                continue;
+            } else {
+                send(socketsJugadores[turno], &cero, sizeof(int), 0);   
+            }
+            
+            printf("Turno jugador %d\n", turno+1);
+            
+            int resultado = procesarTurno(turno+1, socketsJugadores[turno], palabrasJugadores[turno], palabraDeJuego);        
+            puntajes[turno] += resultado;
+            if (resultado == FALLO) {
+                --vidasJugadores[turno];
+            }
+            
+            if (vidasJugadores[turno] <= 0) {
+                ++cantTerminados;
+            }
+            // incrementamos el turno
             ++turno;
             turno %= cantJugadores;
-            continue;
-        } else {
-            send(socketsJugadores[turno], &cero, sizeof(int), 0);   
+            mostrarEstados(puntajes, cantJugadores);
         }
-        
-        printf("Turno jugador %d\n", turno+1);
-        
-        int resultado = procesarTurno(turno+1, socketsJugadores[turno], palabrasJugadores[turno], palabraDeJuego);        
-        puntajes[turno] += resultado;
-        if (resultado == FALLO) {
-            --vidasJugadores[turno];
+        puts("Termino la partida!");
+        fflush(stdout);
+
+        char stringGanador[] = "Felicidades jugador *! sos el ganador";
+        char stringPerdedor[] = "Lo lamento jugador * el ganador fue el jugador *";
+        int maxIndex = getMaxIndex(puntajes, cantJugadores);
+
+        for (int i = 0; i < cantJugadores; ++i) {
+            if (i == maxIndex) {
+                stringGanador[20] = i+1 + '0';
+                send(socketsJugadores[i], stringGanador, strlen(stringGanador)+1, 0);
+                continue;
+            }
+            stringPerdedor[19] = '0' + (i+1);
+            stringPerdedor[47] = '0' + (maxIndex+1);
+            send(socketsJugadores[i], stringPerdedor, strlen(stringPerdedor)+1, 0);
         }
-        
-        if (vidasJugadores[turno] <= 0) {
-            ++cantTerminados;
-        }
-        // incrementamos el turno
-        ++turno;
-        turno %= cantJugadores;
-        mostrarEstados(puntajes, cantJugadores);
+
+        printf("Fin de la partida! la palabra a adivinar era: %s\n", palabraDeJuego);
     }
-    system("clear");
-    puts("Termino la partida!");
-    fflush(stdout);
-
-    char stringGanador[] = "Felicidades jugador *! sos el ganador";
-    char stringPerdedor[] = "Lo lamento jugador * el ganador fue el jugador *";
-    int maxIndex = getMaxIndex(puntajes, cantJugadores);
-
-    for (int i = 0; i < cantJugadores; ++i) {
-        if (i == maxIndex) {
-            stringGanador[20] = i+1 + '0';
-            send(socketsJugadores[i], stringGanador, strlen(stringGanador)+1, 0);
-            continue;
-        }
-        stringPerdedor[19] = '0' + (i+1);
-        stringPerdedor[47] = '0' + (maxIndex+1);
-        send(socketsJugadores[i], stringPerdedor, strlen(stringPerdedor)+1, 0);
-    }
-
-    printf("Fin de la partida! la palabra a adivinar era: %s\n", palabraDeJuego);
-
     return 0;
 }
 
