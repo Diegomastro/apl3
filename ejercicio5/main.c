@@ -31,7 +31,7 @@ int main(int argc, char const* argv[]) {
     }
     checkHelp(argc, argv);
     registrarSeniales();
-    int puerto = atoi(argv[INDICE_PUERTO]);    
+    int puerto = atoi(argv[INDICE_PUERTO]);
     const int uno = 1;
     const int cero = 0;
     int yaLeMandamosQueGano[] = {0,0,0};
@@ -47,7 +47,6 @@ int main(int argc, char const* argv[]) {
 
     char palabraDeJuego[MAX_PALABRA];
     leerPalabra(palabraDeJuego);
-    puts(palabraDeJuego);
     puts("Ingrese la cantidad de jugadores:");
     scanf("%d", &cantJugadores);
 
@@ -63,16 +62,19 @@ int main(int argc, char const* argv[]) {
     setsockopt(
       server,     // Socket descriptor
       SOL_SOCKET, // To manipulate options at the sockets API level
-      SO_RCVTIMEO,// Specify the receiving or sending timeouts 
+      SO_RCVTIMEO,// Specify the receiving or sending timeouts
       (const void *)(&t), // option values
-      sizeof(t) 
+      sizeof(t)
     );
 
-    bind(server, (const struct sockaddr *) &address, (socklen_t) sizeof(address));
+    int conn = bind(server, (const struct sockaddr *) &address, (socklen_t) sizeof(address));
+    if (conn < 0) {
+        puts("Ups! ha habido un error, el puerto esta ocupado");
+        exit(1);
+    }
     listen(server, cantJugadores);
-
     int jugadoresConectados = 0;
-    
+
     // jugadores conectados == ingresados por teclado
     while (jugadoresConectados != cantJugadores) {
         printf("Jugadores conectados = %d\n", jugadoresConectados);
@@ -90,7 +92,7 @@ int main(int argc, char const* argv[]) {
             turno %= cantJugadores;
             continue;
         }
-        
+
         if (yaGano(palabrasJugadores[turno])) {
             if(!yaLeMandamosQueGano[turno]) {
                 cantTerminados++;
@@ -101,17 +103,17 @@ int main(int argc, char const* argv[]) {
             turno %= cantJugadores;
             continue;
         } else {
-            send(socketsJugadores[turno], &cero, sizeof(int), 0);   
+            send(socketsJugadores[turno], &cero, sizeof(int), 0);
         }
-        
+
         printf("Turno jugador %d\n", turno+1);
-        
-        int resultado = procesarTurno(turno+1, socketsJugadores[turno], palabrasJugadores[turno], palabraDeJuego);        
+
+        int resultado = procesarTurno(turno+1, socketsJugadores[turno], palabrasJugadores[turno], palabraDeJuego);
         puntajes[turno] += resultado;
         if (resultado == FALLO) {
             --vidasJugadores[turno];
         }
-        
+
         if (vidasJugadores[turno] <= 0) {
             ++cantTerminados;
         }
@@ -179,7 +181,7 @@ int procesarTurno(int idJugador, int socketId, char* palabraActual, char* palabr
     send(socketId, palabraActual, strlen(palabraActual), 0);
     char intento;
 
-    read(socketId, &intento, 1); 
+    read(socketId, &intento, 1);
     int index = 0;
     char actual;
     int primera = 1;
@@ -194,7 +196,7 @@ int procesarTurno(int idJugador, int socketId, char* palabraActual, char* palabr
        ++index;
        ++palabraDeJuego;
     }
-    send(socketId, &acerto, sizeof(int), 0); 
+    send(socketId, &acerto, sizeof(int), 0);
 
     return acerto ? ACIERTO : FALLO;
 }
