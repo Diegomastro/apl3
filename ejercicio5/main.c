@@ -25,6 +25,11 @@ void registrarSeniales();
 void printHelpAndExit(char const* argv[]);
 void checkHelp(int argc, char const* argv[]);
 
+// GLOBAL VARIABLES
+int SOCKET_SERVER_CONNECTION = -1;
+int *SOCKETS_CLIENT_CONNECTIONS = NULL;
+int SOCKETS_CLIENT_SIZE = 0;
+
 int main(int argc, char const* argv[]) {
     if (argc < CANT_PARAMS) {
         printHelpAndExit(argv);
@@ -36,6 +41,7 @@ int main(int argc, char const* argv[]) {
     const int cero = 0;
     int cantJugadores;
     int server = socket(AF_INET, SOCK_STREAM, 0);
+    SOCKET_SERVER_CONNECTION = server;
     struct sockaddr_in address;
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
@@ -88,7 +94,8 @@ int main(int argc, char const* argv[]) {
             socketsJugadores[jugadoresConectados++] = cliente;
             printf("clietne %d\n", cliente);
         }
-
+        SOCKETS_CLIENT_CONNECTIONS = socketsJugadores;
+        SOCKETS_CLIENT_SIZE = jugadoresConectados;
         // while de partida
         int cantTerminados = 0;
         int turno = 0;
@@ -239,6 +246,12 @@ void signal_sigint(int signum) {
 void signal_sigterm(int signum) {
     system("clear");
     puts("Usted decidio finalizar el programa, saludos!");
+    if (SOCKET_SERVER_CONNECTION > 0) {
+        close(SOCKET_SERVER_CONNECTION);
+    }
+    for (int i = 0; i < SOCKETS_CLIENT_SIZE ; i++) {
+
+    }
     exit(0);
 }
 
