@@ -14,6 +14,7 @@ int yaGano(char* cadena);
 int murio(int vidas);
 void checkHelp(int argc, char const* argv[]);
 void printHelpAndExit(char const* argv[]);
+void checkErroresRead(int valread);
 
 int main(int argc, char const* argv[]) {
     const char* LOCALHOST = "127.0.0.1"; 
@@ -75,12 +76,16 @@ int main(int argc, char const* argv[]) {
 
     while(!murio(vidas)) {
 
-        read(server, &yagano, sizeof(int));
+        valread = read(server, &yagano, sizeof(int));
+        checkErroresRead(valread);
+
         if (yagano) {
             break;
         }
 
-        read(server, buffer, BUFFER_LEN);
+        valread = read(server, buffer, BUFFER_LEN);
+        checkErroresRead(valread);
+
         system("clear");
 
         puts("Es tu turno! tu palabra es:");
@@ -93,7 +98,9 @@ int main(int argc, char const* argv[]) {
         val = send(server, &intento, sizeof(char), 0);
         printf("%d\n", val);
 
-        read(server, &resultadoTurno, sizeof(int));
+        valread = read(server, &resultadoTurno, sizeof(int));
+        checkErroresRead(valread);
+
         if (resultadoTurno == 0) { //if fallo
             vidas--;
             puts("Error: la letra no se encuentra en la palabra");
@@ -105,7 +112,9 @@ int main(int argc, char const* argv[]) {
     }
 
     puts("esperando");
-    read(server, buffer, BUFFER_LEN);
+    valread = read(server, buffer, BUFFER_LEN);
+    checkErroresRead(valread);
+
     puts(buffer);
     
 
@@ -145,5 +154,17 @@ void checkHelp(int argc, char const* argv[]) {
         }
     }
 
+    return;
+}
+
+void checkErroresRead(int valread) {
+    if (valread == -1) {
+        puts("Error en la coneccion");
+        exit(1);
+    }
+    if (valread == 0) {
+        puts("El server cerro");
+        exit(1);
+    }
     return;
 }

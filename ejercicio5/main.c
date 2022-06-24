@@ -29,6 +29,8 @@ void checkHelp(int argc, char const* argv[]);
 int SOCKET_SERVER_CONNECTION = -1;
 int *SOCKETS_CLIENT_CONNECTIONS = NULL;
 int SOCKETS_CLIENT_SIZE = 0;
+int socketsJugadores[MAX_JUGADORES] = {0};
+int cantJugadores;
 
 int main(int argc, char const* argv[]) {
     if (argc < CANT_PARAMS) {
@@ -39,7 +41,6 @@ int main(int argc, char const* argv[]) {
     int puerto = atoi(argv[INDICE_PUERTO]);
     const int uno = 1;
     const int cero = 0;
-    int cantJugadores;
     int server = socket(AF_INET, SOCK_STREAM, 0);
     SOCKET_SERVER_CONNECTION = server;
     struct sockaddr_in address;
@@ -71,7 +72,9 @@ int main(int argc, char const* argv[]) {
 
     while (1) {
     int yaLeMandamosQueGano[] = {0,0,0};
-    int socketsJugadores[MAX_JUGADORES] = {0};
+    socketsJugadores[0] = 0;
+    socketsJugadores[1] = 0;
+    socketsJugadores[2] = 0;
     int vidasJugadores[] = {6, 6, 6};
     char palabrasJugadores[][8] = {
         "*******",
@@ -239,7 +242,6 @@ void leerPalabra(char* buffer) {
 }
 
 void signal_sigint(int signum) {
-    exit(0);
     return;
 }
 
@@ -249,9 +251,13 @@ void signal_sigterm(int signum) {
     if (SOCKET_SERVER_CONNECTION > 0) {
         close(SOCKET_SERVER_CONNECTION);
     }
-    for (int i = 0; i < SOCKETS_CLIENT_SIZE ; i++) {
 
+    if (1 <= cantJugadores && cantJugadores <= 3) {
+        for(int i=0; i < cantJugadores; i++ ) {
+            close(socketsJugadores[i]);
+        }
     }
+
     exit(0);
 }
 
