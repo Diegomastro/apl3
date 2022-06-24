@@ -16,6 +16,7 @@ int adivinoPalabra(char* palabraX);
 int murio(int vidas);
 int getResultadoFinal();
 void checkHelp(int argc, char const* argv[]);
+void checkServerExists();
 
 int main(int argc, char const* argv[]) {
     checkHelp(argc, argv);
@@ -72,9 +73,11 @@ int main(int argc, char const* argv[]) {
     int jugadoresTerminados;
 
     while (!partidaTerminada) {
+        checkServerExists();
         sem_wait(sem_turno);
         if (!adivinoPalabra(palabraJugadorX) && !murio(vidas)) {
-            sem_getvalue(sem_partidaTerminada, &partidaTerminada);
+            checkServerExists();
+            sem_getvalue(sem_partidaTerminada, &partidaTerminada);    
             if (partidaTerminada) {
                 break;
             }
@@ -127,26 +130,29 @@ int main(int argc, char const* argv[]) {
         } else { // si ya termino, sea pq murio o adivino la palabra
 
             if (nuncaMando) {
+                checkServerExists();
                 sem_post(sem_jugadoresTerminados); // mando que termino UNA SOLA VEZ
                 nuncaMando = 0;
             }
 
             // si ya terminaron todos, salir del loop.
+            checkServerExists();
             sem_getvalue(sem_cantJugadores, &cantJugadores);
             sem_getvalue(sem_jugadoresTerminados, &jugadoresTerminados);
 
             if (cantJugadores == jugadoresTerminados) {  // asqueroso esto eh
-
+                checkServerExists();
                 sem_post(sem_letraMandada);
                 break;
             }
 
 
         }
-
+        checkServerExists();
         sem_post(sem_letraMandada);
     }
 
+    checkServerExists();
     sem_wait(sem_resultado);
 
     int resultado = getResultadoFinal();
@@ -226,3 +232,12 @@ int murio(int vidas) {
     return vidas <= 0;
 }
 
+void checkServerExists() {
+    const char *sem_serverExists_name = "serverSem";
+    sem_t* sem_serverExists = sem_open(sem_serverExists_name, 0);
+    if (sem_serverExists == SEM_FAILED) {
+        system("clear");
+        puts("El server se cerro");
+        exit(1);        
+    }
+}

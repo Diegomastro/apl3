@@ -31,7 +31,6 @@ void registrarSeniales();
 void leerPalabra(char* buffer);
 void checkHelp(int argc, char const* argv[]);
 void vaciarMemoria();
-void signal_sigint(int signum);
 void signal_sigterm(int signum);
 
 int main(int argc, char const* argv[]) {
@@ -191,14 +190,7 @@ void leerPalabra(char* buffer) {
     memcpy(addr, buffer, len);
 }
 
-void signal_sigint(int signum) {
-    //signal_sigterm(signum);
-    return;
-}
-
 void signal_sigterm(int signum) {
-    system("clear");
-    puts("Usted decidio finalizar el programa, saludos!");
     vaciarMemoria();
     // cerrar semaforos
     char *sem_cantJugadores_name = "cantJugadores";
@@ -213,20 +205,35 @@ void signal_sigterm(int signum) {
     char* sem_serverExists_name = "serverSem";
 
     sem_unlink(sem_cantJugadores_name);
-    sem_unlink(sem_turno1_name);
-    sem_unlink(sem_turno2_name);
-    sem_unlink(sem_turno3_name);
     sem_unlink(sem_partidaTerminada_name);
     sem_unlink(sem_letraMandada_name);
     sem_unlink(sem_jugadoresTerminados_name);
     sem_unlink(sem_resultado_name);
     sem_unlink(sem_serverExists_name);
+    
+    sem_t* sem_turno1 = sem_open(sem_turno1_name, 0);
+    sem_t* sem_turno2 = sem_open(sem_turno2_name, 0);
+    sem_t* sem_turno3 = sem_open(sem_turno3_name, 0);    
+    sem_post(sem_turno1);
+    sem_post(sem_turno2);
+    sem_post(sem_turno3);
+    //sleep(1); //para que puedan salir los jugadores
 
+    sem_unlink(sem_turno1_name);
+    sem_unlink(sem_turno2_name);
+    sem_unlink(sem_turno3_name);
+    sem_unlink(sem_turno1_name);
+    sem_unlink(sem_turno2_name);
+    sem_unlink(sem_turno3_name);
+
+
+    //system("clear");
+    puts("Usted decidio finalizar el programa, saludos!");
     exit(0);
 }
 
 void registrarSeniales() {
-    signal(SIGINT, signal_sigint);
+    signal(SIGINT, SIG_IGN);
     signal(SIGTERM, signal_sigterm);
 }
 
