@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include <sys/types.h> 
-#include <sys/ipc.h> 
-#include <sys/shm.h> 
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 #include <fcntl.h>
 #include <semaphore.h>
 #include <string.h>
@@ -36,7 +36,7 @@ int main(int argc, char const* argv[]) {
     char *sem_names[] = {sem_turno1_name, sem_turno2_name, sem_turno3_name};
     char* sem_resultado_name = "resultadoPartida";
 
-   
+
     sem_t* sem_turno = sem_open(sem_names[id-1], 0);
     sem_t* sem_partidaTerminada = sem_open(sem_partidaTerminada_name, 0);
     sem_t* sem_resultado = sem_open(sem_resultado_name, 0);
@@ -44,15 +44,16 @@ int main(int argc, char const* argv[]) {
 
     sem_getvalue(sem_partidaTerminada, &partidaTerminada);
 
-    char pathAMemoria[] = "./jug_*";
-    pathAMemoria[6] = id+'0';
-    
+    char pathAMemoria[] = "../jug_*";
+    pathAMemoria[7] = id+'0';
+
     size_t len = MAX_PALABRA; // tam maximo de una palabra (sera una constante)
     int shmid = 0;
     char* palabraJugadorX = NULL;
     key_t key = ftok(pathAMemoria, 'X');
     shmid = shmget(key, len, 0666|IPC_CREAT);
     palabraJugadorX = shmat(shmid, NULL, 0);
+    fflush(stdout);
 
     char* palabraDeJuego = getPalabraDeJuego();
     int puntajeRonda = 0;
@@ -60,16 +61,13 @@ int main(int argc, char const* argv[]) {
     int cantJugadores;
     int jugadoresTerminados;
 
-    puts("entro");
     while (!partidaTerminada) {
         sem_wait(sem_turno);
-
         if (!adivinoPalabra(palabraJugadorX) && !murio(vidas)) {
             sem_getvalue(sem_partidaTerminada, &partidaTerminada);
             if (partidaTerminada) {
                 break;
             }
-            system("clear");
             puts("Es tu turno! tu palabra es:");
             puts(palabraJugadorX);
             puts("ingrese un caracter");
@@ -108,14 +106,14 @@ int main(int argc, char const* argv[]) {
                 puts("Ahorcado! Esperando a que los demas jugadores terminen");
                 fflush(stdout);
             } else {
-                escribirPuntaje(&puntajeRonda);    
+                escribirPuntaje(&puntajeRonda);
             }
 
             if (adivinoPalabra(palabraJugadorX)) {
                 puts("Adivinaste! Esperando a que los demas jugadores terminen");
                 fflush(stdout);
             }
-            
+
         } else { // si ya termino, sea pq murio o adivino la palabra
 
             if (nuncaMando) {
@@ -130,10 +128,10 @@ int main(int argc, char const* argv[]) {
             if (cantJugadores == jugadoresTerminados) {  // asqueroso esto eh
 
                 sem_post(sem_letraMandada);
-                break; 
+                break;
             }
 
-            
+
         }
 
         sem_post(sem_letraMandada);
@@ -143,7 +141,7 @@ int main(int argc, char const* argv[]) {
 
     int resultado = getResultadoFinal();
     finalPartida(resultado, id);
-    
+
     return 0;
 }
 
@@ -161,7 +159,7 @@ char* getPalabraDeJuego() {
     size_t len = MAX_PALABRA;
     int shmid = 0;
     char* addr = NULL;
-    key_t key = ftok("./palabraDeJuego", 'X');
+    key_t key = ftok("../palabraDeJuego", 'X');
     shmid = shmget(key, len, 0666|IPC_CREAT);
     addr = shmat(shmid, NULL, 0);
 
@@ -173,7 +171,7 @@ int getResultadoFinal() {
     size_t len = sizeof(int); // tam maximo de una palabra (sera una constante)
     int shmid = 0;
     char* addr = NULL;
-    key_t key = ftok("./resultado", 'X');
+    key_t key = ftok("../resultado", 'X');
     shmid = shmget(key, len, 0666|IPC_CREAT);
     addr = shmat(shmid, NULL, 0);
     memcpy(&res, addr, len);
@@ -184,13 +182,11 @@ int getResultadoFinal() {
 void finalPartida(int resultado, int id) {
     //MARQUITO completame esto -> listo rey
     // leer la memoria compartida del jugador y printearla
-
+    printf("resultado: %d, id: %d\n", resultado, id);
     if (resultado != id) {
-        system("clear");
         printf("Has perdido, el ganador es el jugador %d, mejor suerte la proxima!", id);
         return;
     }
-    system("clear");
     printf("Felicidades jugador %d, eres el ganador!", id);
 }
 
@@ -198,7 +194,7 @@ void escribirPuntaje(int* puntaje) {
     size_t len = sizeof(int);
     int shmid = 0;
     int* addr = NULL;
-    key_t key = ftok("./puntajes", 'B');
+    key_t key = ftok("../puntajes", 'B');
     shmid = shmget(key, len, 0666|IPC_CREAT);
     addr = shmat(shmid, NULL, 0);
 
@@ -206,15 +202,17 @@ void escribirPuntaje(int* puntaje) {
 }
 
 int adivinoPalabra(char* palabraX) {
-    for (int i = 0; i < MAX_PALABRA; ++i) {
-        if (palabraX[i] == '*') {
+    while(*palabraX) {
+        if (*palabraX == '*') {
             return 0;
         }
+        ++palabraX;
     }
 
     return 1;
 }
 
 int murio(int vidas) {
-    return (vidas <= 0);
+    return vidas <= 0;
 }
+

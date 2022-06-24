@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include <sys/types.h> 
-#include <sys/ipc.h> 
-#include <sys/shm.h> 
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 #include <string.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -47,7 +47,7 @@ int main(int argc, char const* argv[]) {
     char *sem_names[] = {sem_turno1_name, sem_turno2_name, sem_turno3_name};
     char *sem_jugadoresTerminados_name = "JugadoresTerminados";
     char* sem_resultado_name = "resultadoPartida";
-    
+
     sem_unlink(sem_cantJugadores_name);
     sem_unlink(sem_turno1_name);
     sem_unlink(sem_turno2_name);
@@ -65,7 +65,7 @@ int main(int argc, char const* argv[]) {
     sem_t* sem_turno3 = sem_open(sem_turno3_name, O_CREAT, 0600, 0);
     sem_t* sem_jugadoresTerminados = sem_open(sem_jugadoresTerminados_name, O_CREAT, 0600, 0);
     sem_t* sem_resultado = sem_open(sem_resultado_name, O_CREAT, 0600, 0);
-    
+
     sem_t* sem_turnos[] = {sem_turno1, sem_turno2, sem_turno3};
 
     int cantJugadores;
@@ -77,8 +77,9 @@ int main(int argc, char const* argv[]) {
     int numJugadores = 0;
     char* vidasJugadores = crearMemoriaJugadores();
 
-    char palabra[MAX_PALABRA]; 
+    char palabra[MAX_PALABRA];
     leerPalabra(palabra);
+    fflush(stdout);
     char* jugadores[] = {
         crearMemoriaJugador("./jug_1", 'X'),
         crearMemoriaJugador("./jug_2", 'X'),
@@ -90,7 +91,7 @@ int main(int argc, char const* argv[]) {
 
     printf("Ingrese el numero de jugadores\n");
 
-    numJugadores = getchar() - '0'; 
+    numJugadores = getchar() - '0';
     char estanTodos = 0;
     puts("esperando que se conecten todos los jugadores");
     while (numJugadores != cantJugadores) {
@@ -100,7 +101,7 @@ int main(int argc, char const* argv[]) {
     } //esperamos por la cantidad de jugadores
     // PALABRA A ADIVINAR, despues habra que poner la logica para buscarlas de un archivo
 
-
+    puts("Aca no pasa");
     sem_getvalue(sem_jugadoresTerminados, &jugadoresTerminados);
     while (jugadoresTerminados != cantJugadores) {
         printf("Turno del jugador %d\n", turno+1);
@@ -115,7 +116,7 @@ int main(int argc, char const* argv[]) {
         }
         ++turno;
         turno %= cantJugadores;
-        system("clear");
+        //system("clear");
         sem_getvalue(sem_jugadoresTerminados, &jugadoresTerminados);
         printf("jugadores terminados: %d\n", jugadoresTerminados);
         fflush(stdout);
@@ -177,8 +178,8 @@ void leerPalabra(char* buffer) {
 }
 
 void signal_sigint(int signum) {
-    //exit(0); // que molesto
-    return;
+    exit(0); // que molesto
+    // return;
 }
 
 
@@ -196,7 +197,7 @@ void signal_sigterm(int signum) {
     char *sem_names[] = {sem_turno1_name, sem_turno2_name, sem_turno3_name};
     char *sem_jugadoresTerminados_name = "JugadoresTerminados";
     char* sem_resultado_name = "resultadoPartida";
-    
+
     sem_unlink(sem_cantJugadores_name);
     sem_unlink(sem_turno1_name);
     sem_unlink(sem_turno2_name);
@@ -260,7 +261,7 @@ char* crearMemoriaJugadores() {
 
     char vidasIniciales[] = {6 ,6 ,6};
 
-    memcpy(addr, vidasIniciales, len);    
+    memcpy(addr, vidasIniciales, len);
 }
 
 char* crearMemoriaJugador(char* path, char id) {
