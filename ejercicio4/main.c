@@ -126,7 +126,6 @@ int main(int argc, char const* argv[]) {
         } //esperamos por la cantidad de jugadores
         // PALABRA A ADIVINAR, despues habra que poner la logica para buscarlas de un archivo
 
-        puts("Aca no pasa");
         sem_getvalue(sem_jugadoresTerminados, &jugadoresTerminados);
         while (jugadoresTerminados != cantJugadores) {
             printf("Turno del jugador %d\n", turno+1);

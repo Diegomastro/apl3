@@ -9,6 +9,12 @@
 #include <stdlib.h>
 #define MAX_PALABRA 8
 
+int PALABRA_DE_JUEGO;
+int PUNTAJES;
+int VIDAS;
+int JUG;
+int RESULTADO;
+
 char* getPalabraDeJuego();
 void finalPartida();
 void escribirPuntaje(int*);
@@ -61,6 +67,7 @@ int main(int argc, char const* argv[]) {
     char* palabraJugadorX = NULL;
     key_t key = ftok(pathAMemoria, 'X');
     shmid = shmget(key, len, 0666|IPC_CREAT);
+    JUG = shmid;
     palabraJugadorX = shmat(shmid, NULL, 0);
     fflush(stdout);
 
@@ -175,6 +182,7 @@ char* getPalabraDeJuego() {
     char* addr = NULL;
     key_t key = ftok("../palabraDeJuego", 'X');
     shmid = shmget(key, len, 0666|IPC_CREAT);
+    PALABRA_DE_JUEGO = shmid;
     addr = shmat(shmid, NULL, 0);
 
     return addr;
@@ -187,6 +195,7 @@ int getResultadoFinal() {
     char* addr = NULL;
     key_t key = ftok("../resultado", 'X');
     shmid = shmget(key, len, 0666|IPC_CREAT);
+    RESULTADO = shmid;
     addr = shmat(shmid, NULL, 0);
     memcpy(&res, addr, len);
     return res;
@@ -209,6 +218,7 @@ void escribirPuntaje(int* puntaje) {
     int* addr = NULL;
     key_t key = ftok("../puntajes", 'B');
     shmid = shmget(key, len, 0666|IPC_CREAT);
+    PUNTAJES = shmid;
     addr = shmat(shmid, NULL, 0);
 
     memcpy(addr, puntaje, sizeof(int));
@@ -235,6 +245,11 @@ void checkServerExists() {
     if (sem_serverExists == SEM_FAILED) {
         system("clear");
         puts("El server se cerro");
+        shmctl(JUG, IPC_RMID, NULL);
+        shmctl(RESULTADO, IPC_RMID, NULL);
+        shmctl(PALABRA_DE_JUEGO, IPC_RMID, NULL);
+        shmctl(PUNTAJES, IPC_RMID, NULL);
         exit(1);
     }
 }
+
