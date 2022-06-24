@@ -14,11 +14,19 @@
 #define MAX_JUGADORES 3
 
 const char PALABRA_INICIAL[MAX_PALABRA] = "*******";
+// variables globales
+int PALABRA_DE_JUEGO;
+int PUNTAJES;
+int VIDAS;
+int JUG_1;
+int JUG_2;
+int JUG_3;
+int RESULTADO;
 
 char* crearMemoriaCantJugadores();
 char* crearMemoriaJugadores();
 char* conseguirPalabra();
-char* crearMemoriaJugador(char* path, char id);
+char* crearMemoriaJugador(char* path, char id, int *shmid);
 int todosPierden(char* vidas, int numJugadores);
 int hayGanador(char* jugadores[], char* palabra);
 int maxIndex(int arr[], int size);
@@ -31,6 +39,7 @@ void registrarSeniales();
 void leerPalabra(char* buffer);
 void checkHelp(int argc, char const* argv[]);
 void vaciarMemoria();
+void signal_sigterm(int signum);
 
 int main(int argc, char const* argv[]) {
     if (argc > 1) {
@@ -86,11 +95,16 @@ int main(int argc, char const* argv[]) {
     char palabra[MAX_PALABRA];
     leerPalabra(palabra);
     fflush(stdout);
+    int j1,j2,j3;
     char* jugadores[] = {
-        crearMemoriaJugador("./jug_1", 'X'),
-        crearMemoriaJugador("./jug_2", 'X'),
-        crearMemoriaJugador("./jug_3", 'X')
+        crearMemoriaJugador("./jug_1", 'X', &j1),
+        crearMemoriaJugador("./jug_2", 'X', &j2),
+        crearMemoriaJugador("./jug_3", 'X', &j3)
     };
+    JUG_1 = j1;
+    JUG_2 = j2;
+    JUG_3 = j3;
+
     int ganador = -1;
     int turno = 0;
     int* puntajeDeRonda = getMemoriaPuntajeGanado();
@@ -179,6 +193,7 @@ void leerPalabra(char* buffer) {
     key_t key = ftok("./palabraDeJuego", 'X');
     shmid = shmget(key, len, 0666|IPC_CREAT);
     addr = shmat(shmid, NULL, 0);
+    PALABRA_DE_JUEGO = shmid;
 
     memcpy(addr, buffer, len);
 }
@@ -214,6 +229,14 @@ void signal_sigterm(int signum) {
     sem_unlink(sem_resultado_name);
     sem_unlink(sem_serverExists_name);
 
+    // limpiamos shared memory
+    shmctl(JUG_1, IPC_RMID, NULL);
+    shmctl(JUG_2, IPC_RMID, NULL);
+    shmctl(JUG_3, IPC_RMID, NULL);
+    shmctl(RESULTADO, IPC_RMID, NULL);
+    shmctl(VIDAS, IPC_RMID, NULL);
+    shmctl(PALABRA_DE_JUEGO, IPC_RMID, NULL);
+    shmctl(PUNTAJES, IPC_RMID, NULL);
     exit(0);
 }
 
@@ -245,6 +268,7 @@ int* getMemoriaPuntajeGanado() {
     key_t key = ftok("./puntajes", 'B');
     shmid = shmget(key, len, 0666|IPC_CREAT);
     addr = shmat(shmid, NULL, 0);
+    PUNTAJES = shmid;
 
     return addr;
 }
@@ -265,13 +289,13 @@ char* crearMemoriaJugadores() {
     key_t key = ftok("./vidas_jugadores", 'B');
     shmid = shmget(key, len, 0666|IPC_CREAT);
     addr = shmat(shmid, NULL, 0);
-
+    VIDAS = shmid;
     char vidasIniciales[] = {6 ,6 ,6};
 
     memcpy(addr, vidasIniciales, len);
 }
 
-char* crearMemoriaJugador(char* path, char id) {
+char* crearMemoriaJugador(char* path, char id, int *idCopy) {
     size_t len = MAX_PALABRA; // tam maximo de una palabra (sera una constante)
     int shmid = 0;
     char* addr = NULL;
@@ -279,6 +303,7 @@ char* crearMemoriaJugador(char* path, char id) {
     shmid = shmget(key, len, 0666|IPC_CREAT);
     addr = shmat(shmid, NULL, 0);
     memcpy(addr, PALABRA_INICIAL, len);
+    *idCopy = shmid;
     return addr;
 }
 
@@ -309,7 +334,7 @@ void darResultadoJugador(int* ganador, sem_t* sem_resultado) {
     shmid = shmget(key, len, 0666|IPC_CREAT);
     addr = shmat(shmid, NULL, 0);
     memcpy(addr, ganador, sizeof(int));
-
+    RESULTADO = shmid;
     for (int i = 0; i < MAX_JUGADORES; ++i) {
         sem_post(sem_resultado);
     }

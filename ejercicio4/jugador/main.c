@@ -185,7 +185,6 @@ int getResultadoFinal() {
     shmid = shmget(key, len, 0666|IPC_CREAT);
     addr = shmat(shmid, NULL, 0);
     memcpy(&res, addr, len);
-
     return res;
 }
 
