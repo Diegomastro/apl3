@@ -47,6 +47,7 @@ int main(int argc, char const* argv[]) {
     char *sem_names[] = {sem_turno1_name, sem_turno2_name, sem_turno3_name};
     char *sem_jugadoresTerminados_name = "JugadoresTerminados";
     char* sem_resultado_name = "resultadoPartida";
+    char* sem_serverExists_name = "serverSem";
 
     sem_unlink(sem_cantJugadores_name);
     sem_unlink(sem_turno1_name);
@@ -56,6 +57,7 @@ int main(int argc, char const* argv[]) {
     sem_unlink(sem_letraMandada_name);
     sem_unlink(sem_jugadoresTerminados_name);
     sem_unlink(sem_resultado_name);
+    sem_unlink(sem_serverExists_name);
 
     sem_t* sem_cantJugadores = sem_open(sem_cantJugadores_name, O_CREAT, 0600, 0);
     sem_t* sem_partidaTerminada = sem_open(sem_partidaTerminada_name, O_CREAT, 0600, 0);
@@ -65,6 +67,10 @@ int main(int argc, char const* argv[]) {
     sem_t* sem_turno3 = sem_open(sem_turno3_name, O_CREAT, 0600, 0);
     sem_t* sem_jugadoresTerminados = sem_open(sem_jugadoresTerminados_name, O_CREAT, 0600, 0);
     sem_t* sem_resultado = sem_open(sem_resultado_name, O_CREAT, 0600, 0);
+    sem_t* sem_serverExists = sem_open(sem_serverExists_name, O_CREAT, 0600, 0);
+
+    // como ya existe, se lo mando
+    sem_post(sem_serverExists);
 
     sem_t* sem_turnos[] = {sem_turno1, sem_turno2, sem_turno3};
 
@@ -178,10 +184,9 @@ void leerPalabra(char* buffer) {
 }
 
 void signal_sigint(int signum) {
-    exit(0); // que molesto
+    signal_sigterm(signum);
     // return;
 }
-
 
 void signal_sigterm(int signum) {
     system("clear");
@@ -197,6 +202,7 @@ void signal_sigterm(int signum) {
     char *sem_names[] = {sem_turno1_name, sem_turno2_name, sem_turno3_name};
     char *sem_jugadoresTerminados_name = "JugadoresTerminados";
     char* sem_resultado_name = "resultadoPartida";
+    char* sem_serverExists_name = "serverSem";
 
     sem_unlink(sem_cantJugadores_name);
     sem_unlink(sem_turno1_name);
@@ -206,6 +212,7 @@ void signal_sigterm(int signum) {
     sem_unlink(sem_letraMandada_name);
     sem_unlink(sem_jugadoresTerminados_name);
     sem_unlink(sem_resultado_name);
+    sem_unlink(sem_serverExists_name);
 
     exit(0);
 }

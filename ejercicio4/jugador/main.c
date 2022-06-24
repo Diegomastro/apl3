@@ -22,6 +22,16 @@ int main(int argc, char const* argv[]) {
     const char *sem_cantJugadores_name = "cantJugadores";
     const char *sem_letraMandada_name = "letraMandada";
     const char *sem_jugadoresTerminados_name = "JugadoresTerminados";
+    const char *sem_serverExists_name = "serverSem";
+
+    sem_t* sem_serverExists = sem_open(sem_serverExists_name, 0);
+    printf("%p\n", SEM_FAILED);
+    printf("%p\n", sem_serverExists);
+    if (sem_serverExists == SEM_FAILED) {
+        puts("Ups! no hay servidor de juego todavia");
+        exit(1);
+    }
+
     sem_t* sem_jugadoresTerminados = sem_open(sem_jugadoresTerminados_name, 0);
     sem_t* sem_letraMandada = sem_open(sem_letraMandada_name, 0);
     sem_t* sem_cantJugadores = sem_open(sem_cantJugadores_name, 0);
