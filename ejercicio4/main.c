@@ -46,49 +46,13 @@ int main(int argc, char const* argv[]) {
         checkHelp(argc, argv);
     }
     registrarSeniales();
-    int puntajes[] = {0,0,0};
-    char *sem_cantJugadores_name = "cantJugadores";
-    char *sem_partidaTerminada_name = "partidaTerminada";
-    char *sem_turno1_name = "turno1";
-    char *sem_turno2_name = "turno2";
-    char *sem_turno3_name = "turno3";
-    char *sem_letraMandada_name = "letraMandada";
-    char *sem_names[] = {sem_turno1_name, sem_turno2_name, sem_turno3_name};
-    char *sem_jugadoresTerminados_name = "JugadoresTerminados";
-    char* sem_resultado_name = "resultadoPartida";
-    char* sem_serverExists_name = "serverSem";
-
-    sem_unlink(sem_cantJugadores_name);
-    sem_unlink(sem_turno1_name);
-    sem_unlink(sem_turno2_name);
-    sem_unlink(sem_turno3_name);
-    sem_unlink(sem_partidaTerminada_name);
-    sem_unlink(sem_letraMandada_name);
-    sem_unlink(sem_jugadoresTerminados_name);
-    sem_unlink(sem_resultado_name);
-    sem_unlink(sem_serverExists_name);
-
-    sem_t* sem_cantJugadores = sem_open(sem_cantJugadores_name, O_CREAT, 0600, 0);
-    sem_t* sem_partidaTerminada = sem_open(sem_partidaTerminada_name, O_CREAT, 0600, 0);
-    sem_t* sem_letraMandada = sem_open(sem_letraMandada_name, O_CREAT, 0600, 0);
-    sem_t* sem_turno1 = sem_open(sem_turno1_name, O_CREAT, 0600, 0);
-    sem_t* sem_turno2 = sem_open(sem_turno2_name, O_CREAT, 0600, 0);
-    sem_t* sem_turno3 = sem_open(sem_turno3_name, O_CREAT, 0600, 0);
-    sem_t* sem_jugadoresTerminados = sem_open(sem_jugadoresTerminados_name, O_CREAT, 0600, 0);
-    sem_t* sem_resultado = sem_open(sem_resultado_name, O_CREAT, 0600, 0);
-    sem_t* sem_serverExists = sem_open(sem_serverExists_name, O_CREAT, 0600, 0);
-
-    // como ya existe, se lo mando
-    sem_post(sem_serverExists);
-
-    sem_t* sem_turnos[] = {sem_turno1, sem_turno2, sem_turno3};
 
     int cantJugadores;
     int jugadoresTerminados;
 
-    sem_getvalue(sem_cantJugadores, &cantJugadores);
-    sem_getvalue(sem_jugadoresTerminados, &jugadoresTerminados);
 
+
+    int puntajes[] = {0,0,0};
     int numJugadores = 0;
     char* vidasJugadores = crearMemoriaJugadores();
 
@@ -112,45 +76,87 @@ int main(int argc, char const* argv[]) {
     printf("Ingrese el numero de jugadores\n");
 
     numJugadores = getchar() - '0';
-    char estanTodos = 0;
-    puts("esperando que se conecten todos los jugadores");
-    while (numJugadores != cantJugadores) {
-        sleep(2);
+
+    while (1) {
+
+        char *sem_cantJugadores_name = "cantJugadores";
+        char *sem_partidaTerminada_name = "partidaTerminada";
+        char *sem_turno1_name = "turno1";
+        char *sem_turno2_name = "turno2";
+        char *sem_turno3_name = "turno3";
+        char *sem_letraMandada_name = "letraMandada";
+        char *sem_names[] = {sem_turno1_name, sem_turno2_name, sem_turno3_name};
+        char *sem_jugadoresTerminados_name = "JugadoresTerminados";
+        char* sem_resultado_name = "resultadoPartida";
+        char* sem_serverExists_name = "serverSem";
+
+        sem_unlink(sem_cantJugadores_name);
+        sem_unlink(sem_turno1_name);
+        sem_unlink(sem_turno2_name);
+        sem_unlink(sem_turno3_name);
+        sem_unlink(sem_partidaTerminada_name);
+        sem_unlink(sem_letraMandada_name);
+        sem_unlink(sem_jugadoresTerminados_name);
+        sem_unlink(sem_resultado_name);
+        sem_unlink(sem_serverExists_name);
+
+        sem_t* sem_cantJugadores = sem_open(sem_cantJugadores_name, O_CREAT, 0600, 0);
+        sem_t* sem_partidaTerminada = sem_open(sem_partidaTerminada_name, O_CREAT, 0600, 0);
+        sem_t* sem_letraMandada = sem_open(sem_letraMandada_name, O_CREAT, 0600, 0);
+        sem_t* sem_turno1 = sem_open(sem_turno1_name, O_CREAT, 0600, 0);
+        sem_t* sem_turno2 = sem_open(sem_turno2_name, O_CREAT, 0600, 0);
+        sem_t* sem_turno3 = sem_open(sem_turno3_name, O_CREAT, 0600, 0);
+        sem_t* sem_jugadoresTerminados = sem_open(sem_jugadoresTerminados_name, O_CREAT, 0600, 0);
+        sem_t* sem_resultado = sem_open(sem_resultado_name, O_CREAT, 0600, 0);
+        sem_t* sem_serverExists = sem_open(sem_serverExists_name, O_CREAT, 0600, 0);
+
+        // como ya existe, se lo mando
+        sem_post(sem_serverExists);
+
+        sem_t* sem_turnos[] = {sem_turno1, sem_turno2, sem_turno3};
         sem_getvalue(sem_cantJugadores, &cantJugadores);
-        printf("jugadores: %d \n", cantJugadores);
-    } //esperamos por la cantidad de jugadores
-    // PALABRA A ADIVINAR, despues habra que poner la logica para buscarlas de un archivo
-
-    puts("Aca no pasa");
-    sem_getvalue(sem_jugadoresTerminados, &jugadoresTerminados);
-    while (jugadoresTerminados != cantJugadores) {
-        printf("Turno del jugador %d\n", turno+1);
-        fflush(stdout);
-        sem_post(sem_turnos[turno]);
-        sem_wait(sem_letraMandada);//semaforo señalizando que se mandó la letra
-        int puntajeGanado = *puntajeDeRonda;
-        puntajes[turno] += puntajeGanado;
-
-        if (puntajeGanado < 0) {
-            --vidasJugadores[turno];
-        }
-        ++turno;
-        turno %= cantJugadores;
-        //system("clear");
         sem_getvalue(sem_jugadoresTerminados, &jugadoresTerminados);
-        printf("jugadores terminados: %d\n", jugadoresTerminados);
-        fflush(stdout);
-        mostrarEstado(vidasJugadores, puntajes, numJugadores);
-    }
 
-    sem_post(sem_partidaTerminada); // CREO que no lo estoy usando, por las dudas igual queda
-    for (int i = 0; i < 3; ++i) {
-        sem_post(sem_turnos[i]);
-    }
+        char estanTodos = 0;
+        puts("esperando que se conecten todos los jugadores");
+        while (numJugadores != cantJugadores) {
+            sleep(2);
+            sem_getvalue(sem_cantJugadores, &cantJugadores);
+            printf("jugadores: %d \n", cantJugadores);
+        } //esperamos por la cantidad de jugadores
+        // PALABRA A ADIVINAR, despues habra que poner la logica para buscarlas de un archivo
+
+        puts("Aca no pasa");
+        sem_getvalue(sem_jugadoresTerminados, &jugadoresTerminados);
+        while (jugadoresTerminados != cantJugadores) {
+            printf("Turno del jugador %d\n", turno+1);
+            fflush(stdout);
+            sem_post(sem_turnos[turno]);
+            sem_wait(sem_letraMandada);//semaforo señalizando que se mandó la letra
+            int puntajeGanado = *puntajeDeRonda;
+            puntajes[turno] += puntajeGanado;
+
+            if (puntajeGanado < 0) {
+                --vidasJugadores[turno];
+            }
+            ++turno;
+            turno %= cantJugadores;
+            //system("clear");
+            sem_getvalue(sem_jugadoresTerminados, &jugadoresTerminados);
+            printf("jugadores terminados: %d\n", jugadoresTerminados);
+            fflush(stdout);
+            mostrarEstado(vidasJugadores, puntajes, numJugadores);
+        }
+
+        sem_post(sem_partidaTerminada);
+        for (int i = 0; i < 3; ++i) {
+            sem_post(sem_turnos[i]);
+        }
 
     finalPartida(puntajes, numJugadores, sem_resultado);
 
     printf("Fin de la partida! la palabra a adivinar era: %s\n", palabra);
+    }
     return 0;
 }
 
@@ -198,14 +204,7 @@ void leerPalabra(char* buffer) {
     memcpy(addr, buffer, len);
 }
 
-void signal_sigint(int signum) {
-    signal_sigterm(signum);
-    // return;
-}
-
 void signal_sigterm(int signum) {
-    system("clear");
-    puts("Usted decidio finalizar el programa, saludos!");
     vaciarMemoria();
     // cerrar semaforos
     char *sem_cantJugadores_name = "cantJugadores";
@@ -220,14 +219,19 @@ void signal_sigterm(int signum) {
     char* sem_serverExists_name = "serverSem";
 
     sem_unlink(sem_cantJugadores_name);
-    sem_unlink(sem_turno1_name);
-    sem_unlink(sem_turno2_name);
-    sem_unlink(sem_turno3_name);
     sem_unlink(sem_partidaTerminada_name);
     sem_unlink(sem_letraMandada_name);
     sem_unlink(sem_jugadoresTerminados_name);
     sem_unlink(sem_resultado_name);
     sem_unlink(sem_serverExists_name);
+
+    sem_t* sem_turno1 = sem_open(sem_turno1_name, 0);
+    sem_t* sem_turno2 = sem_open(sem_turno2_name, 0);
+    sem_t* sem_turno3 = sem_open(sem_turno3_name, 0);
+    sem_post(sem_turno1);
+    sem_post(sem_turno2);
+    sem_post(sem_turno3);
+    //sleep(1); //para que puedan salir los jugadores
 
     // limpiamos shared memory
     shmctl(JUG_1, IPC_RMID, NULL);
@@ -237,11 +241,21 @@ void signal_sigterm(int signum) {
     shmctl(VIDAS, IPC_RMID, NULL);
     shmctl(PALABRA_DE_JUEGO, IPC_RMID, NULL);
     shmctl(PUNTAJES, IPC_RMID, NULL);
+    sem_unlink(sem_turno1_name);
+    sem_unlink(sem_turno2_name);
+    sem_unlink(sem_turno3_name);
+    sem_unlink(sem_turno1_name);
+    sem_unlink(sem_turno2_name);
+    sem_unlink(sem_turno3_name);
+
+
+    //system("clear");
+    puts("Usted decidio finalizar el programa, saludos!");
     exit(0);
 }
 
 void registrarSeniales() {
-    signal(SIGINT, signal_sigint);
+    signal(SIGINT, SIG_IGN);
     signal(SIGTERM, signal_sigterm);
 }
 
