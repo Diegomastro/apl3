@@ -26,8 +26,6 @@ int main(int argc, char const* argv[]) {
     const char *sem_serverExists_name = "serverSem";
 
     sem_t* sem_serverExists = sem_open(sem_serverExists_name, 0);
-    printf("%p\n", SEM_FAILED);
-    printf("%p\n", sem_serverExists);
     if (sem_serverExists == SEM_FAILED) {
         puts("Ups! no hay servidor de juego todavia");
         exit(1);
@@ -77,7 +75,7 @@ int main(int argc, char const* argv[]) {
         sem_wait(sem_turno);
         if (!adivinoPalabra(palabraJugadorX) && !murio(vidas)) {
             checkServerExists();
-            sem_getvalue(sem_partidaTerminada, &partidaTerminada);    
+            sem_getvalue(sem_partidaTerminada, &partidaTerminada);
             if (partidaTerminada) {
                 break;
             }
@@ -237,6 +235,6 @@ void checkServerExists() {
     if (sem_serverExists == SEM_FAILED) {
         system("clear");
         puts("El server se cerro");
-        exit(1);        
+        exit(1);
     }
 }

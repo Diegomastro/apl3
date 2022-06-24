@@ -95,7 +95,6 @@ int main(int argc, char const* argv[]) {
             printf("Jugadores conectados = %d\n", jugadoresConectados);
             int cliente = accept(server, (struct sockaddr *) &address, &len);
             socketsJugadores[jugadoresConectados++] = cliente;
-            printf("clietne %d\n", cliente);
         }
         SOCKETS_CLIENT_CONNECTIONS = socketsJugadores;
         SOCKETS_CLIENT_SIZE = jugadoresConectados;
