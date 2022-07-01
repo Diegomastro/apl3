@@ -50,10 +50,15 @@ int main(int argc, char const* argv[]) {
     int cantJugadores;
     int jugadoresTerminados;
 
+    printf("Ingrese el numero de jugadores\n");
+    int numJugadores = getchar() - '0';
 
+    if (numJugadores < 0 || numJugadores > 3) {
+        puts("Ups! la cantidad de jugadores tiene que ser un numero entre 1 y 3");
+        exit(1);
+    }
 
     int puntajes[] = {0,0,0};
-    int numJugadores = 0;
     char* vidasJugadores = crearMemoriaJugadores();
 
     char palabra[MAX_PALABRA];
@@ -73,9 +78,7 @@ int main(int argc, char const* argv[]) {
     int turno = 0;
     int* puntajeDeRonda = getMemoriaPuntajeGanado();
 
-    printf("Ingrese el numero de jugadores\n");
-
-    numJugadores = getchar() - '0';
+    
 
     while (1) {
 

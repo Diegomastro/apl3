@@ -24,7 +24,7 @@ void signal_sigterm(int signum);
 void registrarSeniales();
 void printHelpAndExit(char const* argv[]);
 void checkHelp(int argc, char const* argv[]);
-
+void validarPuerto(char const* puerto);
 // GLOBAL VARIABLES
 int SOCKET_SERVER_CONNECTION = -1;
 int *SOCKETS_CLIENT_CONNECTIONS = NULL;
@@ -38,6 +38,17 @@ int main(int argc, char const* argv[]) {
     }
     checkHelp(argc, argv);
     registrarSeniales();
+
+    do {
+        puts("Ingrese la cantidad de jugadores:");
+        scanf("%d", &cantJugadores);
+        if (cantJugadores < 1 || cantJugadores > 3) {
+            puts("Ups! la cantidad de jugadores debe ser entre 1 y 3");
+        }
+    }while(cantJugadores < 1 || cantJugadores > 3);
+
+    validarPuerto(argv[INDICE_PUERTO]);
+
     int puerto = atoi(argv[INDICE_PUERTO]);
     const int uno = 1;
     const int cero = 0;
@@ -67,8 +78,7 @@ int main(int argc, char const* argv[]) {
     listen(server, cantJugadores);
     int jugadoresConectados;
 
-    puts("Ingrese la cantidad de jugadores:");
-    scanf("%d", &cantJugadores);
+
 
     while (1) {
     int yaLeMandamosQueGano[] = {0,0,0};
@@ -159,6 +169,17 @@ int main(int argc, char const* argv[]) {
         printf("Fin de la partida! la palabra a adivinar era: %s\n", palabraDeJuego);
     }
     return 0;
+}
+
+void validarPuerto(char const* puerto) {
+    while(*puerto) {
+        char c = *puerto;
+        if (c < '0' || c > '9') {
+            puts("Error al leer el puerto, asegurese de que sea un valor entero");
+            exit(1);
+        }
+        ++puerto;
+    }
 }
 
 int yaGano(char* cadena) {
